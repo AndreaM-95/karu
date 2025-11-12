@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users/users.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { TripsModule } from './modules/trips/trips.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { RatingsModule } from './modules/ratings/ratings.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     VehiclesModule,
     TripsModule,
     PaymentsModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
