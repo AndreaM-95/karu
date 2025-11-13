@@ -1,77 +1,82 @@
-import { 
-  Entity, 
-  PrimaryGeneratedColumn, 
-  Column, 
-  ManyToOne, 
-  OneToMany, 
-  JoinColumn, 
-  CreateDateColumn, 
-  Index 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
 } from 'typeorm';
-import { User } from 'src/modules/users/entities/User.entity';
-import { DriverVehicle } from './DriverVehicle.entity';
-import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
+import { IsNotEmpty, IsEnum, IsString, IsInt, Min, Max, IsOptional } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
+import { Trip } from '../../trips/entities/trip.entity';
+
+export enum VehicleType {
+  CARRO = 'carro',
+  MOTO = 'moto',
+}
+
+export enum VehicleStatus {
+  ACTIVE = 'active',
+  MAINTENANCE = 'maintenance',
+  INACTIVE = 'inactive',
+}
 
 @Entity('vehicle')
-@Index(['plate'])
-@Index(['statusVehicle'])
-@Index(['vehicleType'])
-@Index(['exclusiveForWomen'])
 export class Vehicle {
   @PrimaryGeneratedColumn()
-  idVehicle!: number;
+  idVehicle: number;
 
-  @Column({ type: 'int' })
-  ownerId!: number;
+  @ManyToOne(() => User, (user) => user.vehicles, { onDelete: 'CASCADE' })
+  @IsNotEmpty()
+  owner: User;
 
-  @Column({ type: 'varchar', length: 20, unique: true })
-  plate!: string;
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  licenseNumber: string;
 
-  @Column({ type: 'varchar', length: 50 })
-  brand!: string;
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  cardProperty: string;
 
-  @Column({ type: 'varchar', length: 50 })
-  model!: string;
+  @Column({ unique: true })
+  @IsNotEmpty()
+  @IsString()
+  plate: string;
 
-  @Column({ type: 'varchar', length: 30, nullable: true })
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  brand: string;
+
+  @Column()
+  @IsNotEmpty()
+  @IsString()
+  model: string;
+
+  @Column({ nullable: true })
+  @IsOptional()
+  @IsString()
   color?: string;
 
-  @Column({ 
-    type: 'enum', 
-    enum: ['carro', 'moto'] 
+  @Column({ type: 'enum', enum: VehicleType })
+  @IsEnum(VehicleType)
+  vehicleType: VehicleType;
+
+  @Column({ default: 4 })
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  capacity: number;
+
+  @Column({
+    type: 'enum',
+    enum: VehicleStatus,
+    default: VehicleStatus.ACTIVE,
   })
-  vehicleType!: 'carro' | 'moto';
+  @IsEnum(VehicleStatus)
+  statusVehicle: VehicleStatus;
 
-  @Column({ type: 'int', default: 4 })
-  capacity!: number;
-
-  @Column({ type: 'boolean', default: false })
-  exclusiveForWomen!: boolean;
-
-  @Column({ type: 'varchar', length: 50 })
-  licenseNumber!: string;
-
-  @Column({ type: 'varchar', length: 50 })
-  cardProperty!: string;
-
-  @Column({ 
-    type: 'enum', 
-    enum: ['active', 'maintenance', 'inactive'],
-    default: 'active'
-  })
-  statusVehicle!: 'active' | 'maintenance' | 'inactive';
-
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt!: Date;
-
-  // 🔹 Relaciones
-  @ManyToOne(() => User, (user) => user.ownedVehicles, { onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'ownerId' })
-  owner!: User;
-
-  @OneToMany(() => DriverVehicle, (dv) => dv.vehicle)
-  driverRelations?: DriverVehicle[];
-
-  @OneToMany(() => RoadTrip, (trip) => trip.vehicle)
-  trips?: RoadTrip[];
+  @OneToMany(() => Trip, (trip) => trip.vehicle)
+  trips: Trip[];
 }
