@@ -5,12 +5,12 @@ import { UserRole } from './src/modules/users/entities/UserRoles.entity';
 import { DriverDocument } from './src/modules/users/entities/DriverDocuments.entity';
 import { DriverVehicle } from './src/modules/vehicles/entities/DriverVehicle.entity';
 import { Vehicle } from './src/modules/vehicles/entities/Vehicle.entity';
-import { RoadTrip } from './src/modules/trips/entities/RoadTrip.entity';
 import { Rating } from './src/modules/ratings/entities/Rating.entity';
 import { DistributionPayment } from './src/modules/payments/entities/DistributionPayment.entity';
 import { PricingRule } from './src/modules/payments/entities/PricingRules.entity';
 import { Settlement } from './src/modules/payments/entities/Settlement.entity';
 import { Payment } from './src/modules/payments/entities/Payment.entity';
+import { Trip } from './src/modules/trips/entities/trip.entity';
 
 dotenv.config();
 
@@ -27,7 +27,7 @@ export const AppDataSource = new DataSource({
     DriverDocument,
     DriverVehicle,
     Vehicle,
-    RoadTrip,
+    Trip,
     Payment,
     PricingRule,
     DistributionPayment,
