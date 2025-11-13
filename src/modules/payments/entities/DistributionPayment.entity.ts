@@ -1,3 +1,16 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  JoinColumn, 
+  CreateDateColumn, 
+  Index 
+} from 'typeorm';
+import { Payment } from './Payment.entity';
+import { User } from 'src/modules/users/entities/User.entity';
+
+
 @Entity('distributionPayment')
 @Index(['driverId'])
 @Index(['ownerId'])

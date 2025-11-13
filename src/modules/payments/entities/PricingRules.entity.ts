@@ -1,3 +1,11 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  Index 
+} from 'typeorm';
+
 @Entity('pricingRules')
 @Index(['vehicleType'])
 @Index(['isActive'])

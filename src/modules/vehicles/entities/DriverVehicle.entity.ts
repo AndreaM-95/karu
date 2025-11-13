@@ -1,3 +1,15 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  JoinColumn, 
+  Unique, 
+  Index 
+} from 'typeorm';
+import { Vehicle } from './Vehicle.entity';
+import { User } from 'src/modules/users/entities/User.entity';
+
 @Entity('driverVehicle')
 @Unique(['vehicleId', 'userId', 'relationType'])
 @Index(['userId'])
@@ -21,7 +33,7 @@ export class DriverVehicle {
   @Column({ type: 'boolean', default: true })
   isActive!: boolean;
 
-  // Relations
+  // 🔹 Relaciones
   @ManyToOne(() => Vehicle, (vehicle) => vehicle.driverRelations, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'vehicleId' })
   vehicle!: Vehicle;

@@ -1,3 +1,17 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  ManyToOne, 
+  OneToMany, 
+  JoinColumn, 
+  Index 
+} from 'typeorm';
+
+import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';              // 🔹 Importa la entidad del viaje
+import { DistributionPayment } from './DistributionPayment.entity';
+
 @Entity('payment')
 @Index(['tripId'])
 @Index(['paymentStatus'])

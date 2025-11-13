@@ -1,3 +1,16 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  ManyToOne, 
+  JoinColumn, 
+  Index, 
+  Unique 
+} from 'typeorm';
+import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
+import { User } from 'src/modules/users/entities/User.entity';
+
 @Entity('rating')
 @Unique(['tripId', 'passengerId'])
 @Index(['driverId'])

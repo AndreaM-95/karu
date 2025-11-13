@@ -1,4 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany }
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  OneToMany, 
+  JoinColumn, 
+  CreateDateColumn, 
+  Index 
+} from 'typeorm';
+import { User } from 'src/modules/users/entities/User.entity';
+import { DriverVehicle } from './DriverVehicle.entity';
+import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
 
 @Entity('vehicle')
 @Index(['plate'])
@@ -52,7 +64,7 @@ export class Vehicle {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt!: Date;
 
-  // Relations
+  // 🔹 Relaciones
   @ManyToOne(() => User, (user) => user.ownedVehicles, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'ownerId' })
   owner!: User;
@@ -62,7 +74,4 @@ export class Vehicle {
 
   @OneToMany(() => RoadTrip, (trip) => trip.vehicle)
   trips?: RoadTrip[];
-
-  @OneToMany(() => Location, (location) => location.vehicle)
-  locations?: Location[];
 }

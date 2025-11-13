@@ -1,3 +1,13 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  JoinColumn, 
+  Index 
+} from 'typeorm';
+import { User } from 'src/modules/users/entities/User.entity';
+
 @Entity('settlement')
 @Index(['userId'])
 @Index(['periodStart', 'periodEnd'])

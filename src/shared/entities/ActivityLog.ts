@@ -1,3 +1,14 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  JoinColumn, 
+  CreateDateColumn, 
+  Index 
+} from 'typeorm';
+
+import { User } from 'src/modules/users/entities/User.entity';
 @Entity('activityLogs')
 @Index(['userId'])
 @Index(['action'])

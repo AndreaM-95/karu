@@ -1,3 +1,19 @@
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  ManyToOne, 
+  OneToMany, 
+  JoinColumn, 
+  Index 
+} from 'typeorm';
+import { User } from 'src/modules/users/entities/User.entity';
+import { Vehicle } from 'src/modules/vehicles/entities/Vehicle.entity';
+import { Payment } from 'src/modules/payments/entities/Payment.entity';  
+import { Rating } from 'src/modules/ratings/entities/Rating.entity';
+
+
 @Entity('roadTrip')
 @Index(['statusTrip'])
 @Index(['passengerId'])
@@ -96,7 +112,4 @@ export class RoadTrip {
 
   @OneToMany(() => Rating, (rating) => rating.trip)
   ratings?: Rating[];
-
-  @OneToMany(() => Location, (location) => location.trip)
-  locations?: Location[];
 }

@@ -1,4 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany }
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  OneToMany, 
+  Index, 
+  CreateDateColumn 
+} from 'typeorm';
+import { UserRole } from './UserRoles.entity';
+import { DriverVehicle } from 'src/modules/vehicles/entities/DriverVehicle.entity';
+import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
+import { Rating } from 'src/modules/ratings/entities/Rating.entity';
+import { Settlement } from 'src/modules/payments/entities/Settlement.entity';
+import { ActivityLog } from 'src/shared/entities/ActivityLog';
+import { DriverDocument } from './DriverDocuments.entity';
+import { Vehicle } from 'src/modules/vehicles/entities/Vehicle.entity';
 
 @Entity('users')
 @Index(['nationalId'])
@@ -35,7 +50,7 @@ export class User {
   @CreateDateColumn({ type: 'timestamp' })
   created!: Date;
 
-  // Relations
+  // 🔹 Relaciones
   @OneToMany(() => UserRole, (userRole) => userRole.user)
   roles?: UserRole[];
 

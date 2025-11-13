@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany }
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  JoinColumn, 
+  Index 
+} from 'typeorm';
+
+import { User } from './User.entity';
 
 @Entity('driverDocuments')
 export class DriverDocument {
