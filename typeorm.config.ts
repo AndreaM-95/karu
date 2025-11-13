@@ -1,5 +1,16 @@
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
+import { User } from './src/modules/users/entities/User.entity';
+import { UserRole } from './src/modules/users/entities/UserRoles.entity';
+import { DriverDocument } from './src/modules/users/entities/DriverDocuments.entity';
+import { DriverVehicle } from './src/modules/vehicles/entities/DriverVehicle.entity';
+import { Vehicle } from './src/modules/vehicles/entities/Vehicle.entity';
+import { RoadTrip } from './src/modules/trips/entities/RoadTrip.entity';
+import { Rating } from './src/modules/ratings/entities/Rating.entity';
+import { DistributionPayment } from './src/modules/payments/entities/DistributionPayment.entity';
+import { PricingRule } from './src/modules/payments/entities/PricingRules.entity';
+import { Settlement } from './src/modules/payments/entities/Settlement.entity';
+import { Payment } from './src/modules/payments/entities/Payment.entity';
 
 dotenv.config();
 
@@ -10,6 +21,18 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  entities: [],
+  entities: [
+    User,
+    UserRole,
+    DriverDocument,
+    DriverVehicle,
+    Vehicle,
+    RoadTrip,
+    Payment,
+    PricingRule,
+    DistributionPayment,
+    Settlement,
+    Rating,
+  ],
   migrations: ['./src/migrations/*.ts'],
 });
