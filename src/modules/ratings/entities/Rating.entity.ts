@@ -1,52 +1,42 @@
-import { 
-  Entity, 
-  PrimaryGeneratedColumn, 
-  Column, 
-  CreateDateColumn, 
-  ManyToOne, 
-  JoinColumn, 
-  Index, 
-  Unique 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
-import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
-import { User } from 'src/modules/users/entities/User.entity';
+
+import { IsInt, Max, Min } from 'class-validator';
+import { Trip } from '../../trips/entities/trip.entity';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('rating')
-@Unique(['tripId', 'passengerId'])
-@Index(['driverId'])
-@Index(['score'])
 export class Rating {
   @PrimaryGeneratedColumn()
-  idRating!: number;
+  idRating: number;
 
-  @Column({ type: 'int' })
-  tripId!: number;
+  @OneToOne(() => Trip, (trip) => trip.rating, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'tripId' })
+  trip: Trip;
 
-  @Column({ type: 'int' })
-  passengerId!: number;
+  @ManyToOne(() => User, (user) => user.givenRatings)
+  @JoinColumn({ name: 'passengerId' })
+  passenger: User;
 
-  @Column({ type: 'int' })
-  driverId!: number;
+  @ManyToOne(() => User, (user) => user.receivedRatings)
+  @JoinColumn({ name: 'driverId' })
+  driver: User;
 
-  @Column({ type: 'int' })
-  score!: number;
+  @Column()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  score: number;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true })
   comments?: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt!: Date;
-
-  // Relations
-  @ManyToOne(() => RoadTrip, (trip) => trip.ratings, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'tripId' })
-  trip!: RoadTrip;
-
-  @ManyToOne(() => User, (user) => user.ratingsGiven, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'passengerId' })
-  passenger!: User;
-
-  @ManyToOne(() => User, (user) => user.ratingsReceived, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'driverId' })
-  driver!: User;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 }
