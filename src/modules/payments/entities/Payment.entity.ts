@@ -1,51 +1,43 @@
-import { 
-  Entity, 
-  PrimaryGeneratedColumn, 
-  Column, 
-  CreateDateColumn, 
-  ManyToOne, 
-  OneToMany, 
-  JoinColumn, 
-  Index 
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
+import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
 
-import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';              // 🔹 Importa la entidad del viaje
-import { DistributionPayment } from './DistributionPayment.entity';
+export type PaymentMethod = 'cash' | 'card' | 'transfer';
+export type PaymentStatus = 'pending' | 'completed' | 'failed';
 
-@Entity('payment')
-@Index(['tripId'])
-@Index(['paymentStatus'])
+@Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn()
-  idPayment!: number;
+  idPayment: number;
 
-  @Column({ type: 'int' })
-  tripId!: number;
+  // FK del viaje
+  @Column()
+  tripId: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  amount!: number;
-
-  @Column({ 
-    type: 'enum', 
-    enum: ['cash', 'card', 'transfer'] 
-  })
-  paymentMethod!: 'cash' | 'card' | 'transfer';
-
-  @Column({ 
-    type: 'enum', 
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending'
-  })
-  paymentStatus!: 'pending' | 'completed' | 'failed';
-
-  @CreateDateColumn({ type: 'timestamp' })
-  paymentDate!: Date;
-
-  // Relations
   @ManyToOne(() => RoadTrip, (trip) => trip.payments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'tripId' })
-  trip!: RoadTrip;
+  trip: RoadTrip;
 
-  @OneToMany(() => DistributionPayment, (dist) => dist.payment)
-  distribution?: DistributionPayment[];
+  // Monto total del pago
+  @Column('decimal', { precision: 10, scale: 2 })
+  amount: number;
+
+  @Column({ type: 'varchar', length: 20 })
+  paymentMethod: PaymentMethod;
+
+  @Column({
+    type: 'varchar',
+    length: 20,
+    default: 'pending',
+  })
+  paymentStatus: PaymentStatus;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
