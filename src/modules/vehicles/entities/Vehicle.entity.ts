@@ -5,8 +5,16 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { IsNotEmpty, IsEnum, IsString, IsInt, Min, Max, IsOptional } from 'class-validator';
-import { User } from '../../users/entities/user.entity';
+import {
+  IsNotEmpty,
+  IsEnum,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+  IsOptional,
+} from 'class-validator';
+import { User } from '../../users/entities/User.entity';
 import { Trip } from '../../trips/entities/trip.entity';
 
 export enum VehicleType {
@@ -68,8 +76,6 @@ export class Vehicle {
   @Min(1)
   @Max(10)
   capacity: number;
-
-
 
   @Column({
     type: 'enum',
