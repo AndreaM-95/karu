@@ -180,4 +180,52 @@ async findByPlate(plate: string): Promise<Vehicle> {
     return vehicle;
   }
 
+  /**
+ * ========================================================================
+ * LIST VEHICLES BY OWNER
+ * ========================================================================
+ * Retrieves all vehicles registered by a specific driver.
+ * Useful for drivers to manage their personal fleet.
+ * 
+ * @param ownerId - ID of the owner/driver
+ * @returns Array of the owner's vehicles, ordered by date
+ */
+ async findByOwner(ownerId: number): Promise<Vehicle[]> {
+    return await this.vehicleRepository.find({
+      where: { owner: { idUser: ownerId } as any },
+      relations: ['owner'],
+      order: { createdAt: 'DESC' }, // Más recientes primero
+    });
+  }
+
+  /**
+ * ========================================================================
+ * UPDATE VEHICLE INFORMATION
+ * ========================================================================
+ * Allows partial updates to an existing vehicle’s data.
+ * 
+ * Features:
+ * - Partial update (only the provided fields are modified)
+ * - Validates the existence of the vehicle before updating
+ * - Keeps all unspecified fields unchanged
+ * @param id - ID of the vehicle to update
+ * @param updateVehicleDto - Data to update (partial)
+ * @returns Updated vehicle
+ * @throws NotFoundException - If the vehicle does not exist
+ */
+ async update(id: number, updateVehicleDto: UpdateVehicleDTO): Promise<Vehicle> {
+    // Validate that the vehicle exists
+    const vehicle = await this.findOne(id);
+
+    // Partial update: only modify the fields that were provided
+    Object.assign(vehicle, updateVehicleDto);
+
+    return await this.vehicleRepository.save(vehicle);
+  }
+
+  
+
+
+
+
 }
