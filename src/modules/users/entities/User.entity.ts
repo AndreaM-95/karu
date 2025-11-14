@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { IsEmail, IsNotEmpty, Length } from 'class-validator';
 import { Trip } from '../../trips/entities/trip.entity';
 import { Rating } from '../../ratings/entities/Rating.entity';
-import { Vehicle } from 'src/modules/vehicles/entities/Vehicle.entity';
+import { Vehicle } from '../../vehicles/entities/Vehicle.entity';
 
 export enum UserRole {
   ADMIN = 'admin',

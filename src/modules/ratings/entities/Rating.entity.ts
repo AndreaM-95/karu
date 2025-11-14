@@ -9,7 +9,7 @@ import {
 
 import { IsInt, Max, Min } from 'class-validator';
 import { Trip } from '../../trips/entities/trip.entity';
-import { User } from 'src/modules/users/entities/User.entity';
+import { User } from '../../users/entities/User.entity';
 
 @Entity('rating')
 export class Rating {

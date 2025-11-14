@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber } from 'class-validator';
-import { Trip } from 'src/modules/trips/entities/trip.entity';
+import { Trip } from '../../trips/entities/trip.entity';
 import {
   Column,
   Entity,
