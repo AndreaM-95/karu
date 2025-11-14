@@ -34,6 +34,8 @@ import { VehicleStatus } from './entities/vehicle.entity';
 export class VehiclesController {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
+//REGISTER VEHICLE
+
   @Post()
   @ApiOperation({ summary: 'Crear un nuevo vehículo' })
   @ApiResponse({
@@ -52,4 +54,21 @@ export class VehiclesController {
   async create(@Body() createVehicleDto: CreateVehicleDTO) {
     return await this.vehiclesService.create(createVehicleDto);
   }
+
+  //LIST VEHICLES WITH FILTERS AND PAGINATION
+   @Get()
+  @ApiOperation({ summary: 'Obtener todos los vehículos con filtros' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de vehículos obtenida exitosamente',
+  })
+  @ApiQuery({ name: 'vehicleType', required: false })
+  @ApiQuery({ name: 'statusVehicle', required: false })
+  @ApiQuery({ name: 'ownerId', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  async findAll(@Query() queryDto: QueryVehicleDTO) {
+    return await this.vehiclesService.findAll(queryDto);
+  }
+  
 }

@@ -59,4 +59,70 @@ export class VehiclesService {
       throw error;
     }
   }
+
+  /**
+ * ========================================================================
+ * LIST VEHICLES WITH FILTERS AND PAGINATION
+ * ========================================================================
+ * Provides a paginated list of vehicles with multiple filtering options.
+ * 
+ * Available filters:
+ * - vehicleType: Vehicle type (sedan, SUV, pickup, etc.)
+ * - statusVehicle: Status (ACTIVE, INACTIVE, MAINTENANCE)
+ * - ownerId: Owner ID
+ * 
+ * Pagination:
+ * - page: Page number (default: 1)
+ * - limit: Records per page (default: 10)
+ * 
+ * @param queryDto - Query parameters with filters and pagination
+ * @returns Object containing data, total, page, and limit
+ */
+
+   async findAll(queryDto: QueryVehicleDTO): Promise<{
+    data: Vehicle[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+     // Pagination setup
+    const { page = 1, limit = 10, ...filters } = queryDto;
+    const skip = (page - 1) * limit;
+
+     // Dynamic construction of WHERE filters
+    const where: FindOptionsWhere<Vehicle> = {};
+
+    // Filter: Vehicle type
+    if (filters.vehicleType) {
+      where.vehicleType = filters.vehicleType;
+    }
+
+    // Filter: Vehicle status
+    if (filters.statusVehicle) {
+      where.statusVehicle = filters.statusVehicle;
+    }
+
+    // Filter: Specific owner
+    if (filters.ownerId) {
+      where.owner = { idUser: filters.ownerId } as any;
+    }
+
+    // Execute query with pagination and filters
+    const [data, total] = await this.vehicleRepository.findAndCount({
+      where,
+      relations: ['owner'], // Incluir información del propietario
+      skip,
+      take: limit,
+      order: { createdAt: 'DESC' }, // Más recientes primero
+    });
+
+    // Return data with pagination metadata
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
+  }
+
 }
