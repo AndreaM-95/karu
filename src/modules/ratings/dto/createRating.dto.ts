@@ -1,6 +1,10 @@
 import { IsInt, IsOptional, Length, Max, Min } from "class-validator";
+import { Trip } from "src/modules/trips/entities/trip.entity";
 
 export class createRatingDTO{
+
+    @IsInt()
+    trip: Trip;
 
     @IsOptional()
     @IsInt({message: "Score must be a number " })
@@ -29,20 +33,4 @@ export class createRatingDTO{
 
 
 
-
-
-
-
-  // Relations
-  @ManyToOne(() => RoadTrip, (trip) => trip.ratings, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'tripId' })
-  trip!: RoadTrip;
-
-  @ManyToOne(() => User, (user) => user.givenRatings, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'passengerId' })
-  passenger!: User;
-
-  @ManyToOne(() => User, (user) => user.receivedRatings, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'driverId' })
-  driver!: User;
 

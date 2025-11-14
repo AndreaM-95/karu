@@ -20,13 +20,13 @@ export class Rating {
   @JoinColumn({ name: 'tripId' })
   trip: Trip;
 
-  @ManyToOne(() => User, (user) => user.givenRatings)
+ /* @ManyToOne(() => User, (user) => user.givenRatings)
   @JoinColumn({ name: 'passengerId' })
   passenger: User;
 
   @ManyToOne(() => User, (user) => user.receivedRatings)
   @JoinColumn({ name: 'driverId' })
-  driver: User;
+  driver: User;*/
 
   @Column()
   @IsInt()
