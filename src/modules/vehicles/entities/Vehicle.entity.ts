@@ -69,6 +69,8 @@ export class Vehicle {
   @Max(10)
   capacity: number;
 
+
+
   @Column({
     type: 'enum',
     enum: VehicleStatus,
@@ -76,6 +78,9 @@ export class Vehicle {
   })
   @IsEnum(VehicleStatus)
   statusVehicle: VehicleStatus;
+
+  @Column({ type: 'timestamp' })
+  createdAt: Date;
 
   @OneToMany(() => Trip, (trip) => trip.vehicle)
   trips: Trip[];
