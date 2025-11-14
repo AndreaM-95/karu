@@ -11,38 +11,3 @@ export class createRatingDTO{
     @IsOptional()
     comments: string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // Relations
-  @ManyToOne(() => RoadTrip, (trip) => trip.ratings, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'tripId' })
-  trip!: RoadTrip;
-
-  @ManyToOne(() => User, (user) => user.givenRatings, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'passengerId' })
-  passenger!: User;
-
-  @ManyToOne(() => User, (user) => user.receivedRatings, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'driverId' })
-  driver!: User;
-
