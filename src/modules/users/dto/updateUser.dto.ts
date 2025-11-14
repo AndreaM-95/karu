@@ -1,6 +1,6 @@
 import { PartialType } from "@nestjs/swagger";
 import { createUserDTO } from "./createUser.dto";
-import { DriverStatus } from "../entities/user.entity";
+import { DriverStatus } from "../entities/User.entity";
 import { IsAlpha, IsEmpty, IsEnum, IsOptional } from "class-validator";
 
 export class updateUserDTO extends PartialType (createUserDTO){

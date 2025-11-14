@@ -15,22 +15,3 @@ export class createRatingDTO{
     @IsOptional()
     comments: string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
