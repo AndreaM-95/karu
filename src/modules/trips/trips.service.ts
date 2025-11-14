@@ -21,4 +21,22 @@ export class TripsService {
   findAllLocations() {
     return this.locationRepository.find();
   }
+
+  async findAllZones(locality: string) {
+    const cleanLocality = locality.trim();
+
+    const location = await this.locationRepository.findOneBy({
+      locality: cleanLocality,
+    });
+    if (!location)
+      throw new CustomHttpException(
+        'Location not found.',
+        HttpStatus.NOT_FOUND,
+      );
+
+    return this.locationRepository.find({
+      where: { locality: cleanLocality },
+      select: ['idLocation', 'zone'],
+    });
+  }
 }
