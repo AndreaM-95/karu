@@ -1,83 +1,77 @@
-import { 
-  Entity, 
-  PrimaryGeneratedColumn, 
-  Column, 
-  OneToMany, 
-  Index, 
-  CreateDateColumn 
-} from 'typeorm';
-import { UserRole } from './UserRoles.entity';
-import { DriverVehicle } from 'src/modules/vehicles/entities/DriverVehicle.entity';
-import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
-import { Rating } from 'src/modules/ratings/entities/Rating.entity';
-import { Settlement } from 'src/modules/payments/entities/Settlement.entity';
-import { ActivityLog } from 'src/shared/entities/ActivityLog';
-import { DriverDocument } from './DriverDocuments.entity';
-import { Vehicle } from 'src/modules/vehicles/entities/Vehicle.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { IsEmail, IsNotEmpty, Length } from 'class-validator';
+import { Trip } from '../../trips/entities/trip.entity';
+import { Rating } from '../../ratings/entities/Rating.entity';
+import { Vehicle } from '../../vehicles/entities/Vehicle.entity';
+
+export enum UserRole {
+  ADMIN = 'admin',
+  OWNER = 'owner',
+  DRIVER = 'driver',
+  PASSENGER = 'passenger',
+}
+
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
+}
+
+export enum DriverStatus {
+  AVAILABLE = 'available',
+  BUSY = 'busy',
+  OFFLINE = 'offline',
+}
 
 @Entity('users')
-@Index(['nationalId'])
-@Index(['phone'])
-@Index(['gender'])
 export class User {
   @PrimaryGeneratedColumn()
-  idUser!: number;
+  idUser: number;
 
-  @Column({ type: 'varchar', length: 100 })
-  name!: string;
+  @Column()
+  @IsNotEmpty()
+  name: string;
 
-  @Column({ 
-    type: 'enum', 
-    enum: ['male', 'female', 'other'] 
+  @Column({ type: 'enum', enum: Gender, default: Gender.FEMALE })
+  gender: Gender;
+
+  @Column({ unique: true })
+  @IsEmail()
+  email: string;
+
+  @Column({ unique: true })
+  @Length(10, 20)
+  phone: number;
+
+  @Column()
+  password: string;
+
+  @Column({ default: true })
+  active: boolean;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.PASSENGER })
+  role: UserRole;
+
+  @Column({
+    type: 'enum',
+    enum: DriverStatus,
+    default: DriverStatus.OFFLINE,
+    nullable: true,
   })
-  gender!: 'male' | 'female' | 'other';
-
-  @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
-  email?: string;
-
-  @Column({ type: 'varchar', length: 20, unique: true })
-  nationalId!: string;
-
-  @Column({ type: 'varchar', length: 20, unique: true })
-  phone!: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  password!: string;
-
-  @Column({ type: 'boolean', default: true })
-  active!: boolean;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  created!: Date;
-
-  // 🔹 Relaciones
-  @OneToMany(() => UserRole, (userRole) => userRole.user)
-  roles?: UserRole[];
+  driverStatus: DriverStatus;
 
   @OneToMany(() => Vehicle, (vehicle) => vehicle.owner)
-  ownedVehicles?: Vehicle[];
+  vehicles: Vehicle[];
 
-  @OneToMany(() => DriverDocument, (doc) => doc.user)
-  driverDocuments?: DriverDocument[];
+  @OneToMany(() => Trip, (trip) => trip.passenger)
+  passengerTrips: Trip[];
 
-  @OneToMany(() => DriverVehicle, (dv) => dv.user)
-  vehicleRelations?: DriverVehicle[];
-
-  @OneToMany(() => RoadTrip, (trip) => trip.passenger)
-  tripsAsPassenger?: RoadTrip[];
-
-  @OneToMany(() => RoadTrip, (trip) => trip.driver)
-  tripsAsDriver?: RoadTrip[];
+  @OneToMany(() => Trip, (trip) => trip.driver)
+  driverTrips: Trip[];
 
   @OneToMany(() => Rating, (rating) => rating.passenger)
-  ratingsGiven?: Rating[];
+  givenRatings: Rating[];
 
   @OneToMany(() => Rating, (rating) => rating.driver)
-  ratingsReceived?: Rating[];
-
-  @OneToMany(() => Settlement, (settlement) => settlement.user)
-  settlements?: Settlement[];
-
-  @OneToMany(() => ActivityLog, (log) => log.user)
-  activityLogs?: ActivityLog[];
+  receivedRatings: Rating[];
 }
