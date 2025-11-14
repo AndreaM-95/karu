@@ -1,7 +1,4 @@
-import { Payment } from '../../payments/entities/payment.entity';
-import { Rating } from '../../ratings/entities/rating.entity';
-import { User } from '../../users/entities/user.entity';
-import { Vehicle } from '../../vehicles/entities/vehicle.entity';
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -11,6 +8,10 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Locations } from './locations.entity';
+import { User } from 'src/modules/users/entities/User.entity';
+import { Vehicle } from 'src/modules/vehicles/entities/Vehicle.entity';
+import { Payment } from 'src/modules/payments/entities/Payment.entity';
+import { Rating } from 'src/modules/ratings/entities/Rating.entity';
 
 export enum TripStatus {
   PENDING = 'pending',

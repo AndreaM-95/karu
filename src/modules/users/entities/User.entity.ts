@@ -1,9 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { IsEmail, IsEnum, IsNotEmpty, Length } from 'class-validator';
-import { Vehicle } from '../../vehicles/entities/vehicle.entity';
+import { IsEmail, IsNotEmpty, Length } from 'class-validator';
 import { Trip } from '../../trips/entities/trip.entity';
-import { Rating } from '../../ratings/entities/rating.entity';
-
+import { Rating } from '../../ratings/entities/Rating.entity';
+import { Vehicle } from 'src/modules/vehicles/entities/Vehicle.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -33,7 +32,7 @@ export class User {
   @IsNotEmpty()
   name: string;
 
-  @Column({ type: 'enum', enum: Gender, default: Gender.FEMALE})
+  @Column({ type: 'enum', enum: Gender, default: Gender.FEMALE })
   gender: Gender;
 
   @Column({ unique: true })

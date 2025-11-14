@@ -1,12 +1,12 @@
+import { IsEnum, IsNumber } from 'class-validator';
+import { Trip } from 'src/modules/trips/entities/trip.entity';
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { RoadTrip } from 'src/modules/trips/entities/RoadTrip.entity';
 
 export type PaymentMethod = 'cash' | 'card' | 'transfer';
 export type PaymentStatus = 'pending' | 'completed' | 'failed';
@@ -16,28 +16,25 @@ export class Payment {
   @PrimaryGeneratedColumn()
   idPayment: number;
 
-  // FK del viaje
-  @Column()
-  tripId: number;
-
-  @ManyToOne(() => RoadTrip, (trip) => trip.payments, { onDelete: 'CASCADE' })
+  @OneToOne(() => Trip, (trip) => trip.payment, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'tripId' })
-  trip: RoadTrip;
+  trip: Trip;
 
-  // Monto total del pago
   @Column('decimal', { precision: 10, scale: 2 })
+  @IsNumber()
   amount: number;
 
-  @Column({ type: 'varchar', length: 20 })
-  paymentMethod: PaymentMethod;
+  @Column({ type: 'enum', enum: ['cash', 'card', 'transfer'] })
+  @IsEnum(['cash', 'card', 'transfer'])
+  paymentMethod: string;
 
   @Column({
-    type: 'varchar',
-    length: 20,
+    type: 'enum',
+    enum: ['pending', 'completed', 'failed'],
     default: 'pending',
   })
-  paymentStatus: PaymentStatus;
+  paymentStatus: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  paymentDate: Date;
 }
