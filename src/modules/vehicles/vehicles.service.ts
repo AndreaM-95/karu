@@ -223,9 +223,137 @@ async findByPlate(plate: string): Promise<Vehicle> {
     return await this.vehicleRepository.save(vehicle);
   }
 
-  
+  /**
+ * ========================================================================
+ * MANAGE VEHICLE STATUS
+ * ========================================================================
+ * Updates the operational status of a vehicle.
+ * 
+ * Possible statuses:
+ * - ACTIVE: Vehicle available for trips
+ * - INACTIVE: Vehicle not available
+ * - MAINTENANCE: Vehicle under maintenance
+ * 
+ * Use cases:
+ * - Temporarily deactivate a vehicle
+ * - Mark a vehicle as under repair
+ * - Reactivate a vehicle after maintenance
+ * 
+ * @param id - Vehicle ID
+ * @param status - New status for the vehicle
+ * @returns Vehicle with updated status
+ * @throws NotFoundException - If the vehicle does not exist
+ */
+async updateStatus(id: number, status: VehicleStatus): Promise<Vehicle> {
+    const vehicle = await this.findOne(id);
+    vehicle.statusVehicle = status;
+    return await this.vehicleRepository.save(vehicle);
+  }
+/**
+ * ========================================================================
+ * HU-011: DELETE VEHICLE (PHYSICAL)
+ * ========================================================================
+ * Permanently deletes a vehicle from the database.
+ * 
+ * WARNING: This is an irreversible physical deletion.
+ * Consider using softDelete() for logical deletion.
+ */
+  async remove(id: number): Promise<void> {
+    const vehicle = await this.findOne(id);
+    await this.vehicleRepository.remove(vehicle);
+  }
 
+  /**
+ * ========================================================================
+ * SOFT DELETE VEHICLE (LOGICAL DELETION)
+ * ========================================================================
+ * Deactivates a vehicle without physically removing it from the database.
+ * 
+ * Advantages:
+ * - Preserves referential integrity
+ * - Allows the vehicle to be restored later
+ * - Keeps trip history and related records intact
+ * 
+ * Implementation: Changes the vehicle status to INACTIVE
+ * 
+ * @param id - ID of the vehicle to deactivate
+ * @returns Vehicle with INACTIVE status
+ * @throws NotFoundException - If the vehicle does not exist
+ */
+async softDelete(id: number): Promise<Vehicle> {
+    return await this.updateStatus(id, VehicleStatus.INACTIVE);
+  }
+/**
+ * ========================================================================
+ * GET AVAILABLE VEHICLES
+ * ========================================================================
+ * Retrieves a list of all active vehicles available for trips.
+ * 
+ * Applied Filter:
+ * - Only vehicles with ACTIVE status
+ * 
+ * Use Cases:
+ * - Display available vehicles to users searching for a trip
+ * - Availability dashboard
+ * - Operational vehicle statistics
+ * 
+ * @returns Array of active vehicles with owner information
+ */
+async getAvailableVehicles(): Promise<Vehicle[]> {
+    return await this.vehicleRepository.find({
+      where: { statusVehicle: VehicleStatus.ACTIVE },
+      relations: ['owner'],
+    });
+  }
+/**
+ * ========================================================================
+ * HU-014: FILTER VEHICLES BY TYPE
+ * ========================================================================
+ * Filters vehicles by their category or type.
+ * 
+ * Common types:
+ * - Sedan
+ * - SUV
+ * - Pickup Truck
+ * - Compact
+ * - Van
+ * - Motorcycle
+ * 
+ * Use Cases:
+ * - Specific search by vehicle type
+ * - User preferences
+ * - Passenger/cargo capacity requirements
+ * 
+ * @param type - Vehicle type to filter by
+ * @returns Array of vehicles matching the specified type
+ */
+async getVehiclesByType(type: string): Promise<Vehicle[]> {
+    return await this.vehicleRepository.find({
+      where: { vehicleType: type as any },
+      relations: ['owner'],
+    });
+  }
 
-
-
+ /**
+ * ========================================================================
+ * HU-015: COUNT VEHICLES BY OWNER
+ * ========================================================================
+ * Counts how many vehicles a driver has registered.
+ * 
+ * Use Cases:
+ * - Validate vehicle limit per driver
+ * - Platform statistics
+ * - Driver dashboard
+ * - Administrative reports
+ * 
+ * Example: Limit drivers to 5 registered vehicles
+ * 
+ * @param ownerId - ID of the vehicle owner
+ * @returns Number of vehicles registered by the owner
+ */
+  async countVehiclesByOwner(ownerId: number): Promise<number> {
+    return await this.vehicleRepository.count({
+      where: { owner: { idUser: ownerId } as any },
+    });
+  }
 }
