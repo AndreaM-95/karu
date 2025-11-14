@@ -125,4 +125,59 @@ export class VehiclesService {
     };
   }
 
+  /**
+ * ========================================================================
+ * VIEW VEHICLE DETAILS BY ID
+ * ========================================================================
+ * Retrieves complete information of a specific vehicle by its ID.
+ * 
+ * Includes:
+ * - Full vehicle data
+ * - Owner information
+ * - History of trips made
+ * 
+ * @param id - Unique ID of the vehicle
+ * @returns Vehicle with loaded relations
+ * @throws NotFoundException - If the vehicle does not exist
+ */
+
+  async findOne(id: number): Promise<Vehicle> {
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { idVehicle: id },
+      relations: ['owner', 'trips'], // Load owner and trips
+    });
+
+    // Validation: Vehicle exists
+    if (!vehicle) {
+      throw new NotFoundException(`Vehículo con ID ${id} no encontrado`);
+    }
+
+    return vehicle;
+  }
+
+  /**
+ * ========================================================================
+ * VIEW VEHICLE DETAILS BY PLATE
+ * ========================================================================
+ * Searches for a specific vehicle by its unique plate number.
+ * Useful for administrative searches and verification processes.
+ * 
+ * @param plate - Vehicle plate number (unique identifier)
+ * @returns The vehicle found, including owner information
+ * @throws NotFoundException - If no vehicle exists with the provided plate
+ */
+async findByPlate(plate: string): Promise<Vehicle> {
+    const vehicle = await this.vehicleRepository.findOne({
+      where: { plate },
+      relations: ['owner'],
+    });
+
+    // Validación: Vehículo con esa placa existe
+    if (!vehicle) {
+      throw new NotFoundException(`Vehículo con placa ${plate} no encontrado`);
+    }
+
+    return vehicle;
+  }
+
 }
