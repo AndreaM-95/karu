@@ -65,4 +65,29 @@ export class TripsController {
     this.logger.debug(`Trip requested by passenger with ID: ${dto.passengerId}`);
     return this.tripsService.createTrip(dto);
   }
+
+  @Put('complete-trip/:tripId')
+  @ApiOperation({ summary: 'End a trip' })
+  @ApiResponse({ status: 200, description: 'Trip successfully completed' })
+  @ApiResponse({ status: 404, description: 'Trip not found' })
+  @ApiResponse({ status: 400, description: 'Trip already canceled' })
+  @ApiResponse({ status: 400, description: 'Trip already completed' })
+  @ApiResponse({ status: 400, description: 'Trip cannot be completed at this stage' })
+  @Roles(UserRole.DRIVER, UserRole.PASSENGER)
+  async completeTrip(@Param('tripId', ParseIntPipe) tripId: number) {
+    this.logger.debug(`Completing trip with ID: ${tripId}`);
+    return this.tripsService.completeTrip(tripId);
+  }
+
+  @Put('cancel-trip/:tripId')
+  @ApiOperation({ summary: 'Cancel a trip' })
+  @ApiResponse({ status: 200, description: 'Trip has been canceled' })
+  @ApiResponse({ status: 404, description: 'Trip not found' })
+  @ApiResponse({ status: 400, description: 'Trip already canceled' })
+  @ApiResponse({ status: 400, description: 'A completed trip cannot be canceled' })
+  @Roles(UserRole.DRIVER, UserRole.PASSENGER)
+  async cancelTrip(@Param('tripId', ParseIntPipe) tripId: number) {
+    this.logger.debug(`Canceling trip with ID: ${tripId}`);
+    return this.tripsService.cancelTrip(tripId);
+  }
 }

@@ -84,4 +84,37 @@ describe('TripsController', () => {
     expect(result.trip.idTrip).toBe(1);
     expect(result.message).toEqual('Trip successfully requested.')
   });
+
+  it('Should complete a trip', async () => {
+    const fakeComplete = {
+      message: 'Trip successfully completed.',
+      trip: {
+        idTrip: 1,
+        distanceKm: 12,
+        cost: 20000,
+        driver: 'Juan',
+        passenger: 'Luna'
+      }
+    };
+
+    service.completeTrip.mockResolvedValue(fakeComplete);
+
+    const result = await controller.completeTrip(1);
+    expect(result.trip.idTrip).toBe(1);
+    expect(result.trip.driver).toBe('Juan');
+  });
+
+  it('Should cancel a trip', async () => {
+    const fakeCancel = {
+      message: 'Trip has been canceled.',
+      tripId: 1,
+      driverAvailable: 'Carlos',
+      cost: 15000,
+    };
+
+    service.cancelTrip.mockResolvedValue(fakeCancel);
+
+    const result = await controller.cancelTrip(1);
+    expect(result.message).toBe('Trip has been canceled.');
+  });
 });

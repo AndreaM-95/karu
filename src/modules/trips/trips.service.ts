@@ -242,4 +242,73 @@ export class TripsService {
   private deg2rad(deg: number) {
     return deg * (Math.PI / 180);
   }
+
+  async completeTrip(tripId: number) {
+    this.logger.debug(`Obtaining trip information with ID: ${tripId}`);
+
+    const trip = await this.tripRepository.findOne({
+      where: { idTrip: tripId },
+      relations: ['driver', 'passenger'],
+    });
+
+    if (!trip)
+      throw new CustomHttpException('Trip not found.', HttpStatus.NOT_FOUND);
+
+    if (trip.statusTrip === TripStatus.CANCELED)
+      throw new CustomHttpException('Trip already canceled.');
+
+    if (trip.statusTrip === TripStatus.COMPLETED)
+      throw new CustomHttpException('Trip already completed.');
+
+    if (
+      trip.statusTrip !== TripStatus.INPROGRESS &&
+      trip.statusTrip !== TripStatus.ACCEPTED
+    ) {
+      throw new CustomHttpException('Trip cannot be completed at this stage.');
+    }
+
+    const distanceKm = trip.distanceKm;
+    const cost = trip.cost;
+    trip.statusTrip = TripStatus.COMPLETED;
+    trip.driver.driverStatus = DriverStatus.AVAILABLE;
+    await this.userRepository.save(trip.driver);
+    await this.tripRepository.save(trip);
+
+    this.logger.debug(`Trip completed, your current status is: ${trip.statusTrip}`);
+    return {
+      message: 'Trip successfully completed.',
+      trip: {
+        idTrip: trip.idTrip,
+        distanceKm,
+        cost,
+        driver: trip.driver.name,
+        passenger: trip.passenger.name,
+      },
+    };
+  }
+
+  async cancelTrip(tripId: number) {
+    this.logger.debug(`Obtaining trip information with ID: ${tripId}`);
+    const trip = await this.tripRepository.findOne({
+      where: { idTrip: tripId },
+      relations: ['driver', 'passenger'],
+    });
+
+    if (!trip) throw new CustomHttpException('Trip not found.', HttpStatus.NOT_FOUND);
+    if (trip.statusTrip === TripStatus.CANCELED) throw new CustomHttpException('Trip already canceled.');
+    if (trip.statusTrip === TripStatus.COMPLETED) throw new CustomHttpException('A completed trip cannot be canceled.');
+
+    trip.statusTrip = TripStatus.CANCELED;
+    trip.driver.driverStatus = DriverStatus.AVAILABLE;
+    await this.userRepository.save(trip.driver);
+    await this.tripRepository.save(trip);
+
+    this.logger.debug(`Trip cancelled, your current status is: ${trip.statusTrip}`);
+    return {
+      message: 'Trip has been canceled.',
+      tripId: trip.idTrip,
+      driverAvailable: trip.driver.name,
+      cost: trip.cost,
+    };
+  }
 }

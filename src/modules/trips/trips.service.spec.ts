@@ -233,4 +233,33 @@ describe('TripsService', () => {
       .toThrow('No trips have been made.');
   });
 
+  it('Should finish a trip', async () => {
+    fakeUserRepo.save = jest.fn().mockResolvedValue(tripsFake[1].driver);
+    fakeTripRepo.save = jest.fn();
+
+    const result = await service.completeTrip(2);
+
+    expect(fakeTripRepo.findOne).toHaveBeenCalledWith({
+      where: { idTrip: 2 },
+      relations: ['driver', 'passenger'],
+    });
+
+    expect(tripsFake[1].statusTrip).toBe('completed');
+    expect(tripsFake[1].driver.driverStatus).toBe('available');
+  });
+
+  it('Should cancel a trip', async () => {
+    fakeUserRepo.save = jest.fn().mockResolvedValue(tripsFake[0].driver);
+    fakeTripRepo.save = jest.fn();
+
+    const result = await service.cancelTrip(1);
+
+    expect(fakeTripRepo.findOne).toHaveBeenCalledWith({
+      where: { idTrip: 1 },
+      relations: ['driver', 'passenger'],
+    });
+
+    expect(tripsFake[0].statusTrip).toBe('canceled');
+    expect(tripsFake[0].driver.driverStatus).toBe('available');
+  });
 });
