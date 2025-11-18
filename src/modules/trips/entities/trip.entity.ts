@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Locations } from './locations.entity';
 import { User } from '../../users/entities/User.entity';
@@ -55,14 +56,14 @@ export class Trip {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
   cost: number;
 
-  @Column({ type: 'enum', enum: TripStatus, default: TripStatus.PENDING })
+  @Column({ type: 'enum', enum: TripStatus, default: TripStatus.INPROGRESS })
   statusTrip: TripStatus;
 
   @OneToOne(() => Payment, (payment) => payment.trip)
   payment: Payment;
 
-  @OneToOne(() => Rating, (rating) => rating.trip)
-  rating: Rating;
+  @OneToMany(() => Rating, (rating) => rating.tripId)
+  rating: Rating[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   requestedAt: Date;
