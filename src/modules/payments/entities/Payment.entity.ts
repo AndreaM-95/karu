@@ -1,5 +1,3 @@
-import { IsEnum, IsNumber } from 'class-validator';
-import { Trip } from '../../trips/entities/trip.entity';
 import {
   Column,
   Entity,
@@ -7,13 +5,24 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Trip } from '../../trips/entities/trip.entity';
+import { IsEnum, IsNumber } from 'class-validator';
 
-export type PaymentMethod = 'cash' | 'card' | 'transfer';
-export type PaymentStatus = 'pending' | 'completed' | 'failed';
+export enum PaymentStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
 
-@Entity('payments')
+export enum PaymentMethod {
+  CASH = 'cash',
+  CARD = 'card',
+  TRANSFER = 'transfer',
+}
+
+@Entity('payment')
 export class Payment {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'idPayment' })
   idPayment: number;
 
   @OneToOne(() => Trip, (trip) => trip.payment, { onDelete: 'CASCADE' })
@@ -24,17 +33,34 @@ export class Payment {
   @IsNumber()
   amount: number;
 
-  @Column({ type: 'enum', enum: ['cash', 'card', 'transfer'] })
-  @IsEnum(['cash', 'card', 'transfer'])
-  paymentMethod: string;
+  @Column('decimal', { precision: 10, scale: 2 })
+  @IsNumber()
+  adminShare: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  @IsNumber()
+  driverShare: number;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  @IsNumber()
+  ownerShare: number;
 
   @Column({
     type: 'enum',
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending',
+    enum: PaymentMethod,
   })
-  paymentStatus: string;
+  @IsEnum(PaymentMethod)
+  paymentMethod: PaymentMethod;
+
+  @Column({
+    type: 'enum',
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
+  })
+  @IsEnum(PaymentStatus)
+  paymentStatus: PaymentStatus;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   paymentDate: Date;
+  
 }
