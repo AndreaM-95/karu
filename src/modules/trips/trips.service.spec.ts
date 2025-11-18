@@ -116,14 +116,6 @@ describe('TripsService', () => {
     );
   });
 
-  it('Should calculate the price', async () => {
-    const distanceKm = 13;
-    const pricePerKm = 3000;
-    const result = Number((distanceKm * pricePerKm).toFixed(2));
-
-    expect(result).toBe(39000);
-  });
-
   it('Returns grouped locations by locality', async () => {
     const result = await service.findAllLocations();
     expect(fakeLocationRepo.find).toHaveBeenCalled();
@@ -183,6 +175,62 @@ describe('TripsService', () => {
     expect(result?.role).toBe("PASSENGER");
     expect(result?.totalTrips).toBe(2);
     expect(result?.trips.length).toBe(2);
+  });
+
+  it('Should create a trip', async () => {
+    fakeUserRepo.findOneBy.mockResolvedValueOnce(passengerFake);
+    fakeUserRepo.findOne.mockResolvedValueOnce(driverFake);
+
+    fakeLocationRepo.findOneBy
+      .mockResolvedValueOnce(originFake)
+      .mockResolvedValueOnce(destinationFake);
+
+    fakeTripRepo.findOne.mockResolvedValueOnce(null);
+
+    fakeTripRepo.create.mockReturnValue(createdTripFake);
+    fakeTripRepo.save.mockResolvedValue(createdTripFake);
+
+    fakeUserRepo.save.mockResolvedValue({ ...driverFake, driverStatus: 'busy' });
+    
+    const result = await service.createTrip(dto);
+
+    expect(fakeUserRepo.findOneBy).toHaveBeenCalledWith({ idUser: 1 });
+    expect(fakeUserRepo.findOne).toHaveBeenCalledWith({
+      where: { idUser: 2 },
+      relations: ['drivingVehicles'],
+    });
+
+    expect(fakeTripRepo.create).toHaveBeenCalled();
+    expect(fakeTripRepo.save).toHaveBeenCalled();
+
+    expect(result.message).toBe('Trip successfully requested.');
+    expect(result.trip.passenger).toBe('Ana Lopez');
+    expect(result.trip.driver).toBe('Carlos Ruiz');
+    expect(result.trip.vehicle).toBe('ABC123');
+  });
+
+  it('Should calculate the price', async () => {
+    const distanceKm = 13;
+    const pricePerKm = 3000;
+    const result = Number((distanceKm * pricePerKm).toFixed(2));
+
+    expect(result).toBe(39000);
+  });
+
+  it('Should throw exception when DRIVER has no trips', async () => {
+    const fakeUserFromToken = { idUser: 10 };
+
+    const fakeUser = {
+      idUser: 10,
+      role: UserRole.DRIVER,
+      driverTrips: [],
+    };
+    
+    fakeUserRepo.findOne.mockResolvedValue(fakeUser);
+
+    await expect(service.getUserTripHistory(fakeUserFromToken))
+      .rejects
+      .toThrow('No trips have been made.');
   });
 
 });

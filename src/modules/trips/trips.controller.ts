@@ -51,4 +51,18 @@ export class TripsController {
     this.logger.debug("Find the user's trips");
     return this.tripsService.getUserTripHistory(req.user);
   }
+
+  @Post('request-trip')
+  @ApiOperation({ summary: 'Create a trip' })
+  @ApiResponse({ status: 201, description: 'Trip successfully requested' })
+  @ApiResponse({ status: 400, description: 'User is not a passenger' })
+  @ApiResponse({ status: 400, description: 'Driver is not available' })
+  @ApiResponse({ status: 400, description: 'Invalid origin or destination' })
+  @ApiResponse({ status: 400, description: 'Origin and destination cannot be the same' })
+  @ApiResponse({ status: 400, description: 'Passenger already has an active trip' })
+  @Roles(UserRole.PASSENGER)
+  async createTrip(@Body() dto: CreateTripDTO) {
+    this.logger.debug(`Trip requested by passenger with ID: ${dto.passengerId}`);
+    return this.tripsService.createTrip(dto);
+  }
 }

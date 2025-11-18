@@ -104,4 +104,142 @@ export class TripsService {
       };
     }
   }
+
+  /**
+   * @description Validates the passenger, driver, their roles, vehicle availability,
+   * and the provided origin/destination locations. Ensures that the
+   * passenger has no active trips, calculates distance and cost,
+   * creates the trip, updates the driver's status, and returns a
+   * simplified response with trip details.
+   * @returns An object containing a success message and trip information.
+ */
+  async createTrip(dto: CreateTripDTO) {
+    this.logger.log(`Creating the trip for the user with ID: ${dto.passengerId}`);
+    const { passengerId, driverId, originLocationId, destinationLocationId } = dto;
+
+    //Search for passenger and validate
+    const passenger = await this.userRepository.findOneBy({ idUser: passengerId });
+    if (!passenger) throw new CustomHttpException( 'Passenger not found.', HttpStatus.NOT_FOUND );
+    if (!passenger.active) throw new CustomHttpException('Passenger is not active.');
+    if (passenger.role !== UserRole.PASSENGER) throw new CustomHttpException('User is not a passenger.');
+
+    //Find a female driver with vehicles
+    const driver = await this.userRepository.findOne({
+      where: { idUser: driverId },
+      relations: ['drivingVehicles']
+    });
+
+    if (!driver)
+      throw new CustomHttpException('Driver not found.', HttpStatus.NOT_FOUND);
+
+    if (!driver.active) throw new CustomHttpException('Driver is not active.');
+
+    if (driver.role !== UserRole.DRIVER)
+      throw new CustomHttpException('User is not a driver.');
+
+    if (driver.driverStatus !== DriverStatus.AVAILABLE)
+      throw new CustomHttpException('Driver is not available.');
+
+    if (!driver.drivingVehicles || driver.drivingVehicles.length === 0)
+      throw new CustomHttpException('This driver has no registered vehicles.');
+
+    const vehicle = driver.drivingVehicles[0];
+
+    //Validate locations
+    const origin = await this.locationRepository.findOneBy({
+      idLocation: originLocationId,
+    });
+    const destination = await this.locationRepository.findOneBy({
+      idLocation: destinationLocationId,
+    });
+
+    if (!origin || !destination)
+      throw new CustomHttpException('Invalid origin or destination.');
+
+    if (origin.idLocation === destination.idLocation)
+      throw new CustomHttpException('Origin and destination cannot be the same.');
+
+    //Prevent the passenger from having another active trip
+    const passengerActiveTrip = await this.tripRepository.findOne({
+      where: {
+        passenger: { idUser: passengerId },
+        statusTrip: In([
+          TripStatus.PENDING,
+          TripStatus.ACCEPTED,
+          TripStatus.INPROGRESS,
+        ]),
+      },
+    });
+    if (passengerActiveTrip) throw new CustomHttpException('Passenger already has an active trip.');
+  
+    const distanceKm = this.calculateDistance(
+      origin.latitude,
+      origin.longitude,
+      destination.latitude,
+      destination.longitude,
+    );
+    const cost = this.calculatePrice(distanceKm);
+
+    const trip = this.tripRepository.create({
+      passenger,
+      driver,
+      vehicle,
+      originLocation: origin,
+      destinationLocation: destination,
+      distanceKm,
+      cost,
+      statusTrip: TripStatus.INPROGRESS,
+    });
+    const savedTrip = await this.tripRepository.save(trip);
+
+    driver.driverStatus = DriverStatus.BUSY;
+    await this.userRepository.save(driver);
+
+    this.logger.log(`Trip created with ID: ${trip.idTrip}`);
+    return {
+      message: 'Trip successfully requested.',
+      trip: {
+        idTrip: savedTrip.idTrip,
+        passenger: passenger.name,
+        driver: driver.name,
+        vehicle: vehicle.plate,
+        origin: origin.zone,
+        destination: destination.zone,
+        distanceKm,
+        cost,
+        status: savedTrip.statusTrip,
+      },
+    };
+  }
+
+  private calculatePrice(distanceKm: number): number {
+    const pricePerKm = 3000;
+    return Number((distanceKm * pricePerKm).toFixed(2));
+  }
+
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
+    const R = 6371;
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(this.deg2rad(lat1)) *
+        Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return Number(distance.toFixed(2));
+  }
+
+  private deg2rad(deg: number) {
+    return deg * (Math.PI / 180);
+  }
 }

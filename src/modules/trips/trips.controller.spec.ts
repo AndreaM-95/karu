@@ -61,4 +61,27 @@ describe('TripsController', () => {
     expect(service.getUserTripHistory).toHaveBeenCalledWith(fakeReq.user);
     expect(result).toEqual(fakeResponseUser);
   });
+  
+  it('Should create a trip', async () => {
+    const fakeTrip = {
+      message: 'Trip successfully requested.',
+      trip: {
+        idTrip: 1,
+        passenger: 'Andrea',
+        driver: 'Carlos',
+        vehicle: 'ABC123',
+        origin: 'Verbenal',
+        destination: 'Suba',
+        distanceKm: 12,
+        cost: 20000,
+        status: TripStatus.INPROGRESS,
+      },
+    };
+
+    service.createTrip.mockResolvedValue(fakeTrip);
+
+    const result = await controller.createTrip({} as any);
+    expect(result.trip.idTrip).toBe(1);
+    expect(result.message).toEqual('Trip successfully requested.')
+  });
 });
