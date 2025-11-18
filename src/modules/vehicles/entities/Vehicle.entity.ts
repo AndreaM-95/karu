@@ -14,7 +14,7 @@ import {
   Max,
   IsOptional,
 } from 'class-validator';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { Trip } from '../../trips/entities/trip.entity';
 
 export enum VehicleType {

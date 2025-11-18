@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString, Length, Max, Min } from "class-validator";
-import { Gender, UserRole } from "../entities/User.entity";
+import { Gender, UserRole } from "../entities/user.entity";
 import { Transform } from "class-transformer";
 
 export class createUserDTO{
