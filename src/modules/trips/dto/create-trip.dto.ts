@@ -1,50 +1,24 @@
-import {
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  Min,
-} from 'class-validator';
-import { TripStatus } from '../entities/trip.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateTripDTO {
+  @ApiProperty({ example: 1, description: 'User ID' })
   @IsNotEmpty()
   @IsNumber()
-  passenger: number;
+  passengerId: number;
 
+  @ApiProperty({ example: 2, description: 'User ID' })
   @IsNotEmpty()
   @IsNumber()
-  driver: number;
+  driverId: number;
 
+  @ApiProperty({ example: 5, description: 'Location ID for the origin point' })
   @IsNotEmpty()
   @IsNumber()
-  vehicle: number;
+  originLocationId: number;
 
+  @ApiProperty({ example: 8, description: 'Location ID for the destination point' })
   @IsNotEmpty()
   @IsNumber()
-  originLocation: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  destinationLocation: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  distanceKm: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  cost: number;
-
-  @IsEnum(TripStatus)
-  statusTrip: TripStatus;
-
-  @IsNotEmpty()
-  payment: number;
-
-  @IsOptional()
-  @IsInt()
-  rating?: number;
+  destinationLocationId: number;
 }
