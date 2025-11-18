@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TripsController } from './trips.controller';
 import { TripsService } from './trips.service';
 import { TripStatus } from './entities/trip.entity';
+import { UserRole } from '../users/entities/User.entity';
 
 const locationsFake = [
   { idLocation: 10, locality: 'Usaquén', zone: 'Verbenal', latitude: 4.6, longitude: -74.0, },
@@ -37,5 +38,27 @@ describe('TripsController', () => {
     expect(typeof locationsUser).toBe('object');
     expect(Object.keys(locationsUser).length).toBeGreaterThan(0);
     expect(locationsUser).toEqual(locationsRecord);
+  });
+
+  it('Should return user trip history', async () => {
+    const fakeReq: any = {
+      user: {
+        idUser: 20,
+        role: UserRole.PASSENGER,
+      },
+    };
+
+    const fakeResponseUser: any = {
+      role: 'PASSENGER',
+      totalTrips: 2,
+      trips: [
+        { idTrip: 1 },
+        { idTrip: 2 },
+      ],
+    };
+    service.getUserTripHistory.mockResolvedValue(fakeResponseUser);
+    const result = await controller.getUserTripHistory(fakeReq);
+    expect(service.getUserTripHistory).toHaveBeenCalledWith(fakeReq.user);
+    expect(result).toEqual(fakeResponseUser);
   });
 });

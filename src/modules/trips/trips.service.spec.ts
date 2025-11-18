@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TripsService } from './trips.service';
+import { UserRole } from '../users/entities/User.entity';
 
 const locationsFake = [
   {
@@ -157,6 +158,31 @@ describe('TripsService', () => {
       { idLocation: 1, zone: 'Verbenal' },
       { idLocation: 2, zone: 'San Antonio' },
     ]);
+  });
+
+  it('Should display the authenticated users travel history', async () => {
+    const fakeUserFromToken = { idUser: 10 };
+    const fakeUserInfo: any = {
+      idUser: 10,
+      role: UserRole.PASSENGER,
+      passengerTrips: [
+        { idTrip: 1, origin: 'A', destination: 'B' },
+        { idTrip: 2, origin: 'C', destination: 'D' },
+      ],
+      driverTrips: [],
+    };
+
+    fakeUserRepo.findOne.mockResolvedValue(fakeUserInfo);
+    const result = await service.getUserTripHistory(fakeUserFromToken);
+
+    expect(fakeUserRepo.findOne).toHaveBeenCalledWith({
+      where: { idUser: 10 },
+      relations: ['passengerTrips', 'driverTrips'],
+    });
+
+    expect(result?.role).toBe("PASSENGER");
+    expect(result?.totalTrips).toBe(2);
+    expect(result?.trips.length).toBe(2);
   });
 
 });

@@ -60,4 +60,48 @@ export class TripsService {
       select: ['idLocation', 'zone'],
     });
   }
+
+  /**
+   * @description Retrieves the authenticated user's trip history.Returns the trip history based on
+   * the user's role.
+   * @param userFromToken - JWT payload containing the user ID.
+   * @returns An object with the user's role, total trips, and trip list.
+  */
+  async getUserTripHistory(userFromToken) {
+    this.logger.debug('Obtaining token information to list trips');
+
+    const { idUser } = userFromToken;
+
+    const user = await this.userRepository.findOne({
+      where: { idUser },
+      relations: ['passengerTrips', 'driverTrips'],
+    });
+
+    if (!user)
+      throw new CustomHttpException('User not found.', HttpStatus.NOT_FOUND);
+
+    if (user.role === UserRole.PASSENGER) {
+      if (!user.passengerTrips || user.passengerTrips.length === 0) {
+        throw new CustomHttpException( 'No trips have been made.', HttpStatus.NOT_FOUND);
+      }
+
+      return {
+        role: 'PASSENGER',
+        totalTrips: user.passengerTrips.length,
+        trips: user.passengerTrips,
+      };
+    }
+
+    if (user.role === UserRole.DRIVER) {
+      if (!user.driverTrips || user.driverTrips.length === 0) {
+        throw new CustomHttpException('No trips have been made.', HttpStatus.NOT_FOUND );
+      }
+
+      return {
+        role: 'DRIVER',
+        totalTrips: user.driverTrips.length,
+        trips: user.driverTrips,
+      };
+    }
+  }
 }
