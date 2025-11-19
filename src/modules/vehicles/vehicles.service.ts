@@ -433,6 +433,85 @@ export class VehiclesService {
     return trips;
   }
 
+  /**
+   * Calculates statistics for a specific vehicle
+   * Includes total trips, total distance traveled, and last trip information
+   *
+   * @param vehicleId - Vehicle ID
+   * @returns Vehicle statistics object
+   */
+  async getVehicleStats(vehicleId: number) {
+    this.logger.log(`Calculating statistics for vehicle ID: ${vehicleId}`);
+
+    const trips = await this.tripRepo.find({
+      where: { vehicle: { idVehicle: vehicleId } },
+      relations: ['originLocation', 'destinationLocation'],
+      order: { requestedAt: 'ASC' },
+    });
+
+    const totalTrips = trips.length;
+
+    // FIX: Convert string to number before summing
+    const totalDistance = trips.reduce((sum, trip) => {
+      const distance = Number(trip.distanceKm) || 0;
+      return sum + distance;
+    }, 0);
+
+    // Format total distance to 2 decimal places
+    const formattedTotalDistance = totalDistance.toFixed(2);
+
+    const lastTrip = trips.length > 0 ? trips[trips.length - 1] : null;
+
+    this.logger.log(
+      `Vehicle stats calculated: ${totalTrips} trips, ${formattedTotalDistance} km total`,
+    );
+
+    return {
+      totalTrips,
+      totalDistance: formattedTotalDistance,
+      lastTrip,
+    };
+  }
+
+  /**
+   * Updates the status of a vehicle
+   *
+   * @param vehicleId - Vehicle ID
+   * @param status - New vehicle status
+   * @returns Updated vehicle
+   * @throws NotFoundException if vehicle not found
+   * @throws BadRequestException if status is invalid
+   */
+  async updateStatus(vehicleId: number, status: string) {
+    this.logger.log(`Updating status for vehicle ID: ${vehicleId} to ${status}`);
+
+    const vehicle = await this.vehicleRepo.findOne({
+      where: { idVehicle: vehicleId },
+    });
+
+    if (!vehicle) {
+      this.logger.warn(`Vehicle not found: ID ${vehicleId}`);
+      throw new NotFoundException('Vehicle not found');
+    }
+
+    // Validate status against enum
+    if (!(status in VehicleStatus)) {
+      this.logger.warn(`Invalid vehicle status provided: ${status}`);
+      throw new BadRequestException('Invalid vehicle status');
+    }
+
+    const oldStatus = vehicle.statusVehicle;
+    vehicle.statusVehicle = status as VehicleStatus;
+
+    const updatedVehicle = await this.vehicleRepo.save(vehicle);
+
+    this.logger.log(
+      `Vehicle ${vehicle.plate} status updated: ${oldStatus} → ${status}`,
+    );
+
+    return updatedVehicle;
+  }
+
 
 }
 
