@@ -1,120 +1,162 @@
-<h1 align-text:"center">KARU APP</h1>
 
-<h3 align-text:"center">Plataforma de Transporte Seguro</h3>
+<div align="center">
 
-# 📘 Documentación
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:ff6ec7,100:a964ff&height=180&section=header&text=KARU%20API&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=40"/>
 
-## 📋 Descripción del Proyecto
-Karu App es una plataforma de transporte tipo ride-sharing que conecta pasajeros con conductores, con un enfoque especial en seguridad y opciones de transporte exclusivo para mujeres. El sistema permite gestionar viajes, vehículos, pagos y calificaciones de manera integral.
+# 🎉 **Somos NovaHer Technologies — Bienvenidos**
+### 🚗💜 *Plataforma de Transporte Seguro (Enfoque en Mujeres)*
 
 ---
 
-## 🎯 Objetivos del Proyecto
-### Objetivo General
-Crear una aplicación backend robusta para gestionar servicios de transporte privado, facilitando la conexión entre pasajeros y conductores, con énfasis en la seguridad y trazabilidad de las operaciones.
-### Objetivos Específicos
-- Gestionar usuarios con múltiples roles (pasajero, conductor, propietario, administrador)
-- Implementar un sistema de viajes con seguimiento en tiempo real
-- Manejar pagos y distribución automática de ganancias
-- Proveer opciones de transporte exclusivo para mujeres
-- Mantener auditoría completa mediante sistema de logs
-- Facilitar calificaciones y retroalimentación entre usuarios
+</div>
+
+---
+
+## 📘 Documentación de la API
+
+Este documento describe el backend de **Karu**, sus objetivos, la arquitectura del sistema, cómo ejecutarlo localmente, las variables de entorno requeridas y ejemplos de los endpoints principales.
+
+Incluye:
+
+✔ Descripción del proyecto  
+✔ Objetivos del API  
+✔ Roles del equipo  
+✔ Instrucciones para ejecutar la API  
+✔ Variables de entorno  
+✔ Ejemplos reales de endpoints  
+✔ Seguridad, pagos, arquitectura y más  
+
+---
+
+## 📋 Descripción del Proyecto
+
+**Karu** es una plataforma de transporte tipo ride-sharing que conecta pasajeros con conductores, con un enfoque especial en seguridad y opciones de transporte exclusivo para mujeres. El sistema permite gestionar viajes, vehículos, pagos y calificaciones de manera integral.
+
+La API permite:
+
+- 👥 Gestión de usuarios (pasajeras, conductoras, propietarias, administradores)
+- 🚘 Gestión de vehículos con exclusividad opcional para mujeres
+- 🗺️ Solicitud y gestión de viajes en tiempo real
+- ⭐ Calificaciones y reputación
+- 💰 Historial de pagos, ganancias y distribución
+- 📊 Auditoría, logs y control administrativo
+
+---
+
+## 🎯 Objetivo del API
+
+### 🎯 Objetivo General  
+Proveer un backend estable, seguro y escalable que gestione toda la lógica del ecosistema de movilidad de Karu.
+
+### 🎯 Objetivos Específicos  
+- Gestión robusta de usuarios con roles dinámicos  
+- Módulo completo de viajes  
+- Control total de vehículos  
+- Pagos automáticos con distribución conductor/propietario  
+- Auditoría completa de todas las operaciones  
+- Trazabilidad del estado de cada viaje  
 
 ---
 
 ## 👥 Tipos de Usuarios
-`Pasajero (Passenger)`
-- Solicita viajes
-- Califica conductores
-- Realiza pagos
-- Visualiza historial de viajes
-  
-`Conductor (Driver)`
-- Acepta y realiza viajes
-- Recibe el 70% del valor del viaje
-- Puede usar vehículos propios o de terceros
-- Debe tener licencia de conducción vigente
-  
-`Propietario (Owner)`
-- Registra vehículos en la plataforma
-- Recibe el 30% del valor de los viajes realizados con su vehículo
-- Asigna conductores a sus vehículos
-- Gestiona el estado de sus vehículos
 
-`Administrador (Admin)`
-- Gestiona todos los usuarios
-- Supervisa operaciones del sistema
-- Procesa liquidaciones
-- Accede a reportes y estadísticas
+### 👤 Pasajera (Passenger)
+- Solicita viajes  
+- Realiza pagos  
+- Califica a la conductora  
+- Tiene historial de viajes  
+
+### 🚘 Conductora (Driver)
+- Acepta viajes  
+- Completa rutas  
+- Recibe 54% del viaje si el vehículo tiene propietaria
+- Recibe **90%** del viaje si NO hay propietaria  
+- Puede usar vehículo propio o asignado  
+
+### 🚗 Propietaria (Owner)
+- Registra vehículos  
+- Asigna conductoras  
+- Recibe 36% del valor del viaje cuando su vehículo es utilizado
+
+### 🛡️ Administrador (Admin)
+- Control total del sistema  
+- Gestión de usuarios, vehículos, viajes y reportes  
+- Recibe el 10% de las ganancias de los viajes
 
 ---
 
 ## 🔄 Flujo Principal de la Aplicación
-### Fase 1: Registro y Configuración
-```
+
+### FASE 1 — Registro
+
+```txt
 Usuario nuevo
-├─ Se registra con datos personales (nombre, email, cédula, teléfono, género)
-├─ Recibe rol inicial de "pasajero"
-└─ Si desea ser conductor u owner, completa información adicional
+├─ Llena sus datos
+├─ Se le asigna rol “pasajero”
+└─ Puede actualizar para ser conductor u owner
 ```
 
-### Fase 2: Configuración de Conductor/Propietario
-```
+### FASE 2 — Habilitación de conductor / propietario
+
+```txt
 Conductor:
-├─ Sube licencia de conducción
-├─ Se asocia a un vehículo
-└─ Queda disponible para aceptar viajes
+├─ Sube documentación
+├─ Se asocia a vehículo
+└─ Queda habilitado
 
 Propietario:
-├─ Registra vehículo (placa, marca, modelo, etc.)
-├─ Marca si es exclusivo para mujeres (opcional)
-├─ Asigna conductores
-└─ Recibe ganancias del 30%
+├─ Registra vehículo
+├─ Marca exclusividad opcional
+└─ Asigna conductoras
 ```
 
-### Fase 3: Solicitud de Viaje
-```
-Pasajero:
-├─ Ingresa coordenadas de origen (latitud, longitud)
-├─ Ingresa coordenadas de destino (latitud, longitud)
-├─ Sistema calcula distancia usando fórmula de Haversine
-├─ Sistema calcula costo según pricingRules
-├─ Viaje queda en estado "pending"
-└─ Notifica a conductores disponibles
+### FASE 3 — Solicitud del viaje
+
+```txt
+Pasajera:
+├─ Indica origen
+├─ Indica destino
+├─ Sistema calcula costo (Haversine)
+└─ Se notifica a conductoras disponibles
 ```
 
-### Fase 4: Ejecución del Viaje
-```
+### FASE 4 — Ejecución
+
+```txt
 Conductor:
-├─ Ve viajes pendientes
-├─ Acepta viaje → estado "accepted"
-├─ Inicia viaje → estado "in_progress"
-├─ Completa viaje → estado "completed"
-└─ Confirma pago
+├─ Acepta viaje
+├─ Llega al origen
+├─ Inicia viaje
+└─ Completa viaje
 ```
 
-### Fase 5: Pago y Distribución
-```
+### FASE 5 — Pago
+
+```txt
 Sistema:
-├─ Registra pago del pasajero
-├─ Calcula distribución automática:
-│   ├─ 70% para conductor
-│   └─ 30% para propietario (si aplica)
-├─ Genera registro en distributionPayment
-└─ Acumula para liquidaciones periódicas
+├─ Calcula distribución automática
+│   ├─ 10% Administrador
+│   ├─ 54% Conductora (si hay propietaria)
+│   ├─ 36% Propietaria (si su vehículo es usado)
+│   └─ 90% Conductora cuando NO hay propietaria
+├─ Registra pago
+└─ Actualiza historial financiero
 ```
 
-### Fase 6: Calificación
-```
-Pasajero:
-├─ Califica al conductor (1-5 estrellas)
-├─ Deja comentarios opcionales
-└─ Calificación afecta reputación del conductor
+### FASE 6 — Calificación
+
+```txt
+Pasajera:
+├─ Califica
+└─ Deja comentarios
 ```
 
 ---
 
 ## 🏗️ Arquitectura del Sistema
+
+Basada en **NestJS + TypeORM + MySQL**.
+
 ```
 src/
  ├── common/
@@ -124,9 +166,8 @@ src/
  │   |   └── custom-http.exception.ts
  │   └── filters
  │       └── http-exception.filter.ts
- ├── migrations/
- │   ├── 1763051831226-InsertLocations.ts
- │   └── 1763082719673-InitMigration.ts
+ ├── migrations
+ │       
  ├── modules/
  |   ├── auth/
  │   |   ├── decorators/
@@ -210,145 +251,163 @@ src/
 
 ---
 
-## 🚀 Endpoints principales
+## 🧪 Pruebas Unitarias y Evidencias
 
-### 🔐 Autenticación
-| Método | Ruta | Descripción | Requiere Token |
-|--------|-------|--------------|----------------|
-| `POST` | `/api/auth/register` | Registra un nuevo usuario | ❌ |
-| `POST` | `/api/auth/admin/create` | Crea un suario (Solo admin) | ✅ |
-| `POST` | `/api/auth/login` | Inicia sesión y devuelve token JWT | ❌ |
-| `POST` | `/api/auth/change-password` | Cambia la contraseña | ✅ |
-| `GET` | `/api/auth/me` | Devuelve la informacion del usuario | ✅ |
+### 🧪 Pruebas Unitarias
 
----
+Las pruebas unitarias se implementaron usando **Jest** sobre los módulos principales de la API:
 
-### 👤 Usuarios
-| Método | Ruta | Descripción | Requiere Token | Rol permitido |
-|--------|-------|--------------|----------------|----------------|
-| `GET` | `/api/users/:rol` | Listar todos los usuarios por el rol | ✅ | admin |
-| `GET` | `/api/users/:idUser` | Listar un usuario por su id | ✅ | admin |
-| `POST` | `/api/users` | Crear un usuario | ✅ | admin |
-| `PATCH` | `/api/users/:idUser` | Actualizar la información de un usuario | ✅ | admin |
+- **Auth**  
+- **Users**   
+- **Trips**
+- **Raitings**  
+- **Payments**
+- **Vehicles**
 
----
+#### Ejecución de pruebas
 
-### 🚕 Vehículos
-| Método | Ruta | Descripción | Requiere Token | Rol permitido |
-|--------|-------|--------------|----------------|----------------|
-| `GET` | `/api/vehicles` | Obtiene los vehículos | ✅ |  |
-| `GET` | `/api/vehicles/owner/:ownerId` | Obtiene los vehículos de un propietario | ✅ |  |
-| `GET` | `/api/vehicles/driver/:driverId` | Obtiene los vehículos de una conductora | ✅ |  |
-| `GET` | `/api/vehicles/:id/trips` | Historial de viajes de un vehículo | ✅ |  |
-| `GET` | `/api /vehicles/:id/stats` | Estadísticas del vehículo | ✅ |  |
-| `GET` | `/api/vehicles/:id` | Información completa de un vehículo | ✅ |  |
-| `POST` | `/api/vehicles` | Crear un vehículo | ✅ | admin |
-| `POST` | `/api/vehicles/assign-driver` | Asignar un vehículo | ✅ | admin |
-| `PATCH` | `/api/vehicles/:id/status` | Actualizar el estado de un vehículo | ✅ | admin |
-
----
-
-### 🗺️ Viajes
-| Método | Ruta | Descripción | Requiere Token | Rol permitido |
-|--------|-------|--------------|----------------|----------------|
-| `GET` | `/api/trips/locations` | Lista todas las ubicaciones disponibles | ✅ | Todos |
-| `GET` | `/api/trips/locations/:nameLocality` | Lista los barrios de una localidad | ✅ | Todos |
-| `GET` | `/api/trips/my-trips` | Historial de viajes del usuario autenticado | ✅ | Todos |
-| `POST` | `/api/trips/request-trip` | Crear un viaje | ✅ | Pasajera |
-| `PUT` | `/api/trips/complete-trip/:tripId` | Terminar el viaje | ✅ | Pasajera y conductora |
-| `PUT` | `/api/trips/cancel-trip/:tripId` | Cancelar viaje | ✅ | Pasajera y conductora |
-
----
-
-### 💰 Pagos
-| Método | Ruta | Descripción | Requiere Token | Rol permitido |
-|--------|-------|--------------|----------------|----------------|
-| `GET` | `/api/payments` | Obtiene el historial de pagos | ✅ |  |
-| `GET` | `/api/payments/earnings` | Obtiene la ganancia para cada usuario | ✅ |  |
-| `GET` | `/api/settlements` | Obtiene la liquidación de un periodo | ✅ |  |
-| `POST` | `/api/payments` | Crea un pago | ✅ |  |
-| `POST` | `/api/settlements/generate` | Genera las liquidaciones de un usuario| ✅ |  |
-
----
-
-### ✅ Calificaciones
-| Método | Ruta | Descripción | Requiere Token | Rol permitido |
-|--------|-------|--------------|----------------|----------------|
-| `GET` | `/api/rating` | Lista todas las calificaciones de un usuario | ✅ | admin |
-| `GET` | `/api/rating/all` | Devuelve un reporte con la información de las calificaciones | ✅ | Pasajera y conductora |
-| `GET` | `/api/rating/:idRating` | Lista una calificacion por su id | ✅ | Pasajera y conductora |
-| `POST` | `/api/rating` | Crea una calificación | ✅ | Pasajera y conductora |
-
----
-
-## 🔑 Autenticación
-
-- Los endpoints protegidos requieren un **token JWT** en el header:  
-  ```
-  Authorization: Bearer <token>
-  ```
-- Los tokens se generan al iniciar sesión (`/api/authM/login`).  
-- Las contraseñas se almacenan **encriptadas con bcrypt** antes de guardarse en la base de datos.
-
----
-
-## 🧪 Pruebas con Postman
-
-- **Colección:** `Consultas-UsuariosProductos.postman_collection.json`
-- **Variable de entorno:**  
-  ```
-  {{BASE_URL}} = http://localhost:4000
-  ```
-
-### Ejemplo de flujo de prueba
-
-1. Registrar un usuario (`/api/authM/register`)
-2. Iniciar sesión (`/api/authM/login`)
-3. Copiar el token JWT devuelto
-4. Usar el token para acceder a `/api/users`, `/api/tasks` o `/api/grades`
-
-**Ejemplo de Login Request:**
-```json
-{
-  "email": "user@ejemplo.com",
-  "password": "123456"
-}
+```bash
+npm run test
+npm run test:cov
 ```
+## Resultado de la ejecución
+Todas las pruebas configuradas se ejecutan correctamente:
+```bash
+Test Suites: 16 passed, 16 total
+Tests:       207 passed, 207 total
+Time:        78.122 s
+```
+## 🛠️ Stack Tecnológico
 
-**Ejemplo de Login Response:**
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
+- Node.js  
+- NestJS  
+- TypeORM  
+- MySQL  
+- JWT  
+- Bcrypt  
+- Swagger  
+- Postman  
+- Git  
+
+---
+
+## ⚙ Variables de Entorno
+
+```env
+PORT=4000
+APP_NAME=app-karu
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=******
+DB_NAME=karu_app
+JWT_SECRET_KEY=mi_llave_segura
+JWT_EXPIRES_IN=1h
 ```
 
 ---
 
-## ⚙️ Configuración del entorno
+## ▶️ Instrucciones para Ejecutar la API
 
-Archivo `.env`:
+```bash
+npm install
+cp .env.template .env
+npm run migration:run
+npm run start:dev
 ```
-PORT = 4000
-APP_NAME= ManagerUsers
-DB_HOST= localhost
-DB_PORT= 3306
-DB_USERNAME= nombre_de_usuario
-DB_PASSWORD= contraseña
-DB_NAME= nombre_base_de_datos
-JWT_SECRET_KEY= llave_secreta
-JWT_EXPIRES_IN= tiempo_expiracion_token
+
+Localhost:
+
+```
+http://localhost:4000
+```
+
+Swagger:
+
+```
+http://localhost:4000/api
 ```
 
 ---
 
+# 🚀 ENDPOINTS COMPLETOS
 
-## 💾 Características de la Base de Datos
-- ✅ Normalizada - Evita redundancia de datos
-- ✅ Con índices - Optimizada para búsquedas rápidas
-- ✅ Integridad referencial - Foreign keys con restricciones
-- ✅ Auditable - Sistema completo de logs
-- ✅ Escalable - Preparada para crecimiento
-- ✅ Flexible - Roles y configuraciones dinámicas
+## 🔐 Auth — `/auth`
+
+| Método | Ruta | Descripción |
+|--------|-------|-------------|
+| POST | `/auth/register` | Registrar |
+| POST | `/auth/login` | Login |
+| GET | `/auth/me` | Ver usuario |
+| POST | `/auth/change-password` | Cambiar contraseña |
+| POST | `/auth/admin/create` | Crear usuario admin |
+
+---
+
+## 👤 Usuarios — `/api/users`
+
+| Método | Ruta |
+|--------|-------|
+| GET | `/users` |
+| GET | `/users/:id` |
+| GET | `/users/rol/:rol` |
+| GET | `/users/name/:name` |
+| POST | `/users` |
+| PATCH | `/users/:id` |
+| PATCH | `/users/passenger/me` |
+| PATCH | `/driverStatus/:idDriver`|
+| DELETE | `/users/:id` |
+
+---
+
+## 🚗 Vehículos — `/vehicles`
+
+| Método | Ruta |
+|--------|-------|
+| POST | `/vehicles` |
+| POST | `/vehicles/assign-driver` |
+| GET | `/vehicles` |
+| GET | `/vehicles/owner/:ownerId` |
+| GET | `/vehicles/driver/:driverId` |
+| GET | `/vehicles/:id/trips` |
+| GET | ` /vehicles/:id/stats` |
+| GET | `/vehicles/:id` |
+| PATCH | `/vehicles/:id/status` |
+
+---
+
+## 🗺️ Viajes — `/api/trips`
+
+| Método | Ruta |
+|--------|-------|
+| GET | `/trips/locations` |
+| GET | `/trips/locations/:nameLocality` |
+| GET | `/trips/my-trips` |
+| POST | `/trips/request-trip` |
+| PUT | `/trips/complete-trip/:tripId` |
+| PUT | `/trips/cancel-trip/:tripId` |
+
+---
+
+## 💰 Pagos — `/payments`
+
+| Método | Ruta |
+|--------|-------|
+| POST | `/payments/from-trip` |
+| GET | `/payments/me/history` |
+| GET | `/payments/me/earnings` |
+| GET | `/payments/admin/summary` |
+
+---
+
+## ⭐ Calificaciones — `/api/ratings`
+
+| Método | Ruta |
+|--------|-------|
+| GET | `/rating/admin` |
+| GET | `/rating/admin/:id` |
+| GET | `/rating/myratings` |
+| POST | `/ratings` |
 
 ---
 
@@ -411,51 +470,19 @@ Ejemplo para Carro:
 - Tarifa Base: $3,000
 - Distancia: 11.5 KM
 - Costo Total: (distancia * tarifa) = $34,500
+---
 
-### Distribución de Ganancias
-`Escenario 1:` Conductor con vehículo propio
-- Conductor recibe: 100% del valor del viaje
+## 🧑‍💻 Equipo y Roles
 
-`Escenario 2:` Conductor con vehículo de tercero
-- Conductor recibe: 70% del valor del viaje
-- Propietario recibe: 30% del valor del viaje
-
-### Liquidaciones
-- Se generan periódicamente (configurable)
-- Agrupan todas las ganancias del período
-- Registran fecha de pago
-- Permiten trazabilidad de pagos realizados
+- **⭐ Andrea Mejía** — Scrum Master / Backend  
+- **⭐ Marcela Ramírez** — Product Owner / Backend  
+- **⭐ Valeria Vargas** — Backend  
+- **⭐ Heidy Romero** — Backend  
 
 ---
 
-## 🛠️ Stack tecnológico
-`Backend`
-- Node.js + Express.js
-- MySQL (base de datos)
-- JWT (autenticación)
-- Bcrypt (encriptación de contraseñas)
+## 📄 Licencia
 
-`Servicios Externos`
-- Fórmula de Haversine para cálculo de distancias entre coordenadas
+💜 **KARU APP** — Movilidad segura en Bogotá.  
+© 2025 **NovaHer Technologies** — Todos los derechos reservados.
 
-`Herramientas`
-- Postman (testing de API)
-- Git (control de versiones)
-- Swagger (Documenatación)
-- Vercel (Despliegue del backend)
-- Render (Despliegue de la base de datos)
-
----
-
-## Notas adicionales
-- **Versión actual:** v1.0.0
-- **Última actualización:** 18/11/2025  
-- **Equipo de desarrollo:**
-  - `Andrea Mejia`: Scrum Master - Dev Backend
-  - `Marcela Ramirez`: Product owner - Dev Backend
-  - `Valeria Vargas`: Dev Backend
-  - `Heidy Romero`: Dev Backend
-
----
-
-📄 **Fin de la documentación**
