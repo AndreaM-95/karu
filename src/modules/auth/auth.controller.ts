@@ -109,4 +109,40 @@ export class AuthController {
     return this.authService.adminCreate(dto, req.user);
   }
 
+  /**
+   * User login
+   * Authenticates a user with email and password
+   * Returns JWT token for subsequent authenticated requests
+   */
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'User login',
+    description: 'Authenticates a user with email and password. Returns a JWT access token ' +
+                 'that must be included in the Authorization header for protected endpoints.',
+  })
+  @ApiBody({ type: LoginUserDTO })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful. Returns access token and user information.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid credentials (wrong email or password).',
+  })
+  @ApiBadRequestResponse({
+    description: 'Missing or invalid email/password format.',
+  })
+  async login(@Body() dto: LoginUserDTO) {
+    this.logger.log(`POST /auth/login - Login attempt for email: ${dto.email}`);
+
+    const user = await this.authService.validateUser(dto.email, dto.password);
+
+    if (!user) {
+      this.logger.warn(`Login failed for email: ${dto.email}`);
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return this.authService.login(user);
+  }
+
 }
