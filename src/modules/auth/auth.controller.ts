@@ -70,5 +70,43 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  /**
+   * Admin creates a new driver or owner user
+   * Restricted to administrators only
+   * Allows creation of driver and owner accounts with specific privileges
+   */
+  @Post('admin/create')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth()
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Create driver or owner user (Admin only)',
+    description: 'Allows administrators to create driver or owner accounts. ' +
+                 'Only female users are allowed. Drivers require valid license information.',
+  })
+  @ApiBody({ type: AdminCreateUserDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully by admin. Returns access token and user information.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Not authenticated or invalid token.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Insufficient permissions. Only administrators can create users.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid role, data, or non-female user.',
+  })
+  @ApiConflictResponse({
+    description: 'Email or driver license already registered.',
+  })
+  adminCreate(@Body() dto: AdminCreateUserDto, @Request() req) {
+    this.logger.log(
+      `POST /auth/admin/create - Admin ${req.user.email} creating user with role: ${dto.role}`,
+    );
+    return this.authService.adminCreate(dto, req.user);
+  }
 
 }
