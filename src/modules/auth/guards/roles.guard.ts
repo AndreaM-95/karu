@@ -1,56 +1,86 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common"
-import { Reflector } from "@nestjs/core"
-import {ROLES_KEY} from "../roles.decorator";
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from '../decorators/roles.decorator';
+
 /**
- * RolesGuard:
- * Verifica si el usuario tiene los roles necesarios para acceder
- * a una ruta protegida mediante el decorador @Roles().
+ * Roles Authorization Guard
+ * Verifies if an authenticated user has the required roles to access a protected route
+ * Works in combination with the @Roles() decorator
  */
 @Injectable()
-export class RolesGuard implements CanActivate{
-    /**
-     * Constructor:
-     * Inyecta Reflector para obtener los metadatos de roles
-     * definidos en controladores o métodos.
-     * @param reflector - Permite leer los metadatos de @Roles().
-     */
-    constructor (private reflector:Reflector){}
-    /**
-     * Método canActivate:
-     * Evalúa si el usuario autenticado posee un rol permitido.
-     * @param context - Contexto de ejecución actual (request HTTP).
-     * @returns true si el acceso es autorizado.
-     * @throws ForbiddenException si el usuario no está autenticado
-     * o su rol no tiene permisos.
-     */
-    canActivate(context:ExecutionContext):boolean{
-        const requiredRoles=this.reflector.getAllAndOverride<string[]>(ROLES_KEY,[
-            context.getHandler(), 
-            context.getClass(),
-        ])
+export class RolesGuard implements CanActivate {
+  private readonly logger = new Logger(RolesGuard.name);
 
-        console.log('=== ROLES GUARD DEBUG ===');
-        console.log('ROLES_KEY:', ROLES_KEY);
-        console.log('Roles requeridos:', requiredRoles);
-        console.log('Tipo de requiredRoles:', typeof requiredRoles, Array.isArray(requiredRoles));
-        
-        if(!requiredRoles){return true}; 
+  constructor(private reflector: Reflector) {}
 
-        const {user}=context.switchToHttp().getRequest();
-        
-        console.log('Usuario completo:', user);
-        console.log('Rol del usuario:', user?.role);
-        console.log('Tipo de user.role:', typeof user?.role);
-        console.log('¿Incluye?:', requiredRoles.includes(user?.role));
-        console.log('Comparación individual:');
-        requiredRoles.forEach(r => console.log(`  "${r}" === "${user?.role}":`, r === user?.role));
-        console.log('========================');
-        
-        if(!user){throw new ForbiddenException("El usuario no está autenticado en el sistema")}
+  /**
+   * Validates if the user has the required roles to access the route
+   * 
+   * @param context - Execution context containing request and route metadata
+   * @returns True if user has required roles, throws exception otherwise
+   * @throws UnauthorizedException if user is not authenticated
+   * @throws ForbiddenException if user lacks required roles
+   */
+  canActivate(context: ExecutionContext): boolean {
+    // Get required roles from @Roles() decorator
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
-        if(!requiredRoles.includes(user.role)){
-            throw new ForbiddenException("Su rol en el sistema no tiene acceso a este servicio")
-        }
-        return true;
+    // If no roles are required, allow access
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
     }
+
+    // Get user from request
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    // Verify user is authenticated
+    if (!user) {
+      this.logger.warn('Access denied: User not authenticated');
+      throw new UnauthorizedException('User is not authenticated');
+    }
+
+    // Verify user has a role assigned
+    if (!user.role) {
+      this.logger.warn(`Access denied: User ${user.idUser} has no role assigned`);
+      throw new ForbiddenException('User does not have a role assigned');
+    }
+
+    // Normalize roles to lowercase for case-insensitive comparison
+    const normalizedRequiredRoles = requiredRoles.map((role) =>
+      String(role).toLowerCase(),
+    );
+    const normalizedUserRole = String(user.role).toLowerCase();
+
+    // Check if user's role is in the allowed roles
+    const hasRole = normalizedRequiredRoles.includes(normalizedUserRole);
+
+    if (!hasRole) {
+      this.logger.warn(
+        `Access denied: User ${user.email} (ID: ${user.idUser}) with role "${user.role}" ` +
+        `attempted to access resource requiring roles: [${requiredRoles.join(', ')}]`,
+      );
+      throw new ForbiddenException(
+        `Your role (${user.role}) is not authorized to access this resource. ` +
+        `Required roles: ${requiredRoles.join(', ')}`,
+      );
+    }
+
+    this.logger.log(
+      `Access granted: User ${user.email} (ID: ${user.idUser}) with role "${user.role}" ` +
+      `accessing endpoint: ${request.method} ${request.url}`,
+    );
+
+    return true;
+  }
 }

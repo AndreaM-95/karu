@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
@@ -6,47 +6,71 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
+/**
+ * JWT Authentication Strategy
+ * Validates JWT tokens and retrieves user information
+ * Implements Passport JWT strategy for token-based authentication
+ */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(
-        private configService: ConfigService,
-        @InjectRepository(User)
-        private userRepo: Repository<User>,
-    ) {
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: configService.get<string>('JWT_SECRET_KEY') || 'your-secret-key-here',
-        });
+  private readonly logger = new Logger(JwtStrategy.name);
+
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(User)
+    private userRepo: Repository<User>,
+  ) {
+    const secret = configService.get<string>('JWT_SECRET_KEY');
+
+    if (!secret) {
+      throw new Error('JWT_SECRET_KEY is not defined in environment variables');
     }
 
-    /**
-     * Valida el payload del JWT y retorna el usuario
-     * Este método es llamado automáticamente por Passport después de verificar el token
-     */
-    async validate(payload: any) {
-        // El payload contiene: { sub: idUser, name, email, role, driverStatus }
-        const user = await this.userRepo.findOne({
-            where: { idUser: payload.sub }, // ⚠️ CORREGIDO: Ahora usa idUser
-            select: ['idUser', 'name', 'email', 'role', 'phone', 'gender', 'active', 'driverStatus']
-        });
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: secret,
+    });
 
-        if (!user) {
-            throw new UnauthorizedException('Usuario no encontrado');
-        }
+    this.logger.log('JWT Strategy initialized successfully');
+  }
 
-        if (!user.active) {
-            throw new UnauthorizedException('Usuario inactivo');
-        }
+  /**
+   * Validates the JWT payload and retrieves user information
+   * Called automatically by Passport after token signature verification
+   * 
+   * @param payload - Decoded JWT payload containing user information
+   * @returns User object with essential fields for the request context
+   * @throws UnauthorizedException if user not found or inactive
+   */
+  async validate(payload: any) {
+    this.logger.log(`Validating JWT token for user ID: ${payload.sub}`);
 
-        return {
-            idUser: user.idUser,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            phone: user.phone,
-            gender: user.gender,
-            driverStatus: user.driverStatus,
-        };
+    const user = await this.userRepo.findOne({
+      where: { idUser: payload.sub },
+      select: ['idUser', 'name', 'email', 'role', 'phone', 'gender', 'active', 'driverStatus'],
+    });
+
+    if (!user) {
+      this.logger.warn(`JWT validation failed: User not found (ID: ${payload.sub})`);
+      throw new UnauthorizedException('User not found');
     }
+
+    if (!user.active) {
+      this.logger.warn(`JWT validation failed: Inactive user (ID: ${user.idUser}, Email: ${user.email})`);
+      throw new UnauthorizedException('User is inactive');
+    }
+
+    this.logger.log(`JWT validation successful for user: ${user.email} (ID: ${user.idUser})`);
+
+    return {
+      idUser: user.idUser,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      gender: user.gender,
+      driverStatus: user.driverStatus,
+    };
+  }
 }
