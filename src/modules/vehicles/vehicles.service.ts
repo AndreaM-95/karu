@@ -404,6 +404,35 @@ export class VehiclesService {
     }));
   }
 
+  /**
+   * Retrieves trip history for a specific vehicle
+   *
+   * @param vehicleId - Vehicle ID
+   * @returns List of trips made by the vehicle
+   * @throws NotFoundException if vehicle not found
+   */
+  async getTripsByVehicle(vehicleId: number) {
+    this.logger.log(`Retrieving trips for vehicle ID: ${vehicleId}`);
+
+    const vehicle = await this.vehicleRepo.findOne({
+      where: { idVehicle: vehicleId },
+    });
+
+    if (!vehicle) {
+      this.logger.warn(`Vehicle not found: ID ${vehicleId}`);
+      throw new NotFoundException('Vehicle not found');
+    }
+
+    const trips = await this.tripRepo.find({
+      where: { vehicle: { idVehicle: vehicleId } },
+      relations: ['driver', 'originLocation', 'destinationLocation'],
+    });
+
+    this.logger.log(`Found ${trips.length} trips for vehicle: ${vehicle.plate}`);
+
+    return trips;
+  }
+
 
 }
 
