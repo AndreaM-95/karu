@@ -3,91 +3,70 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  ManyToMany,
   OneToMany,
+  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import {
-  IsNotEmpty,
-  IsEnum,
-  IsString,
-  IsInt,
-  Min,
-  Max,
-  IsOptional,
-} from 'class-validator';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { Trip } from '../../trips/entities/trip.entity';
+
+export enum VehicleStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
 
 export enum VehicleType {
   CARRO = 'carro',
   MOTO = 'moto',
 }
 
-export enum VehicleStatus {
-  ACTIVE = 'active',
-  MAINTENANCE = 'maintenance',
-  INACTIVE = 'inactive',
-}
-
-@Entity('vehicle')
+@Entity('vehicles')
 export class Vehicle {
   @PrimaryGeneratedColumn()
   idVehicle: number;
 
-  @ManyToOne(() => User, (user) => user.vehicles, { onDelete: 'CASCADE' })
-  @IsNotEmpty()
-  owner: User;
-
-  @Column()
-  @IsNotEmpty()
-  @IsString()
-  licenseNumber: string;
-
-  @Column()
-  @IsNotEmpty()
-  @IsString()
-  cardProperty: string;
-
   @Column({ unique: true })
-  @IsNotEmpty()
-  @IsString()
   plate: string;
 
-  @Column()
-  @IsNotEmpty()
-  @IsString()
-  brand: string;
-
-  @Column()
-  @IsNotEmpty()
-  @IsString()
-  model: string;
+  @Column({ nullable: true })
+  brand: string;  // ← CAMBIAR de driverName a brand
 
   @Column({ nullable: true })
-  @IsOptional()
-  @IsString()
-  color?: string;
+  model?: string;
 
-  @Column({ type: 'enum', enum: VehicleType })
-  @IsEnum(VehicleType)
-  vehicleType: VehicleType;
-
-  @Column({ default: 4 })
-  @IsInt()
-  @Min(1)
-  @Max(10)
-  capacity: number;
+  @Column({
+    type: 'enum',
+    enum: VehicleType,
+    nullable: true,
+  })
+  vehicleType?: VehicleType;
 
   @Column({
     type: 'enum',
     enum: VehicleStatus,
     default: VehicleStatus.ACTIVE,
   })
-  @IsEnum(VehicleStatus)
   statusVehicle: VehicleStatus;
 
-  @Column({ type: 'timestamp' })
-  createdAt: Date;
+  @ManyToOne(() => User, user => user.ownedVehicles, { nullable: false })
+  owner: User;
+
+  @ManyToMany(() => User, user => user.drivingVehicles)
+  @JoinTable({
+    name: 'vehicle_drivers',
+    joinColumn: { name: 'vehicle_id', referencedColumnName: 'idVehicle' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'idUser' },
+  })
+  drivers: User[];
 
   @OneToMany(() => Trip, (trip) => trip.vehicle)
   trips: Trip[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
