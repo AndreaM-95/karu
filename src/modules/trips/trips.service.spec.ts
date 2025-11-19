@@ -178,6 +178,8 @@ describe('TripsService', () => {
   });
 
   it('Should create a trip', async () => {
+    const userFromToken = { idUser: 1 };
+    
     fakeUserRepo.findOneBy.mockResolvedValueOnce(passengerFake);
     fakeUserRepo.findOne.mockResolvedValueOnce(driverFake);
 
@@ -190,24 +192,26 @@ describe('TripsService', () => {
     fakeTripRepo.create.mockReturnValue(createdTripFake);
     fakeTripRepo.save.mockResolvedValue(createdTripFake);
 
-    fakeUserRepo.save.mockResolvedValue({ ...driverFake, driverStatus: 'busy' });
-    
-    const result = await service.createTrip(dto);
+    fakeUserRepo.save.mockResolvedValue({ 
+      ...driverFake, 
+      driverStatus: 'busy' 
+    });
+
+    const result = await service.createTrip(userFromToken, dto);
 
     expect(fakeUserRepo.findOneBy).toHaveBeenCalledWith({ idUser: 1 });
     expect(fakeUserRepo.findOne).toHaveBeenCalledWith({
       where: { idUser: 2 },
       relations: ['drivingVehicles'],
     });
-
     expect(fakeTripRepo.create).toHaveBeenCalled();
     expect(fakeTripRepo.save).toHaveBeenCalled();
-
     expect(result.message).toBe('Trip successfully requested.');
     expect(result.trip.passenger).toBe('Ana Lopez');
     expect(result.trip.driver).toBe('Carlos Ruiz');
     expect(result.trip.vehicle).toBe('ABC123');
   });
+
 
   it('Should calculate the price', async () => {
     const distanceKm = 13;

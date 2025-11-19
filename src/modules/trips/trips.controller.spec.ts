@@ -63,35 +63,43 @@ describe('TripsController', () => {
   });
 
   it('Should create a trip', async () => {
+    const fakeReq = {
+      user: { idUser: 1 }, // tomado del token
+    };
+
+    const cost = 20000;
     const fakeTrip = {
       message: 'Trip successfully requested.',
-      trip: {
-        idTrip: 1,
-        passenger: 'Andrea',
-        driver: 'Carlos',
-        vehicle: 'ABC123',
-        origin: 'Verbenal',
-        destination: 'Suba',
-        distanceKm: 12,
-        cost: 20000,
-        status: TripStatus.INPROGRESS,
-      },
-    };
+        trip: {
+          idTrip: 1,
+          passenger: 'Andrea',
+          driver: 'Carlos',
+          vehicle: 'ABC123',
+          origin: 'Verbenal',
+          destination: 'Suba',
+          distanceKm: 12,
+          price: `COP $ ${cost}`,
+          status: TripStatus.INPROGRESS,
+        },
+      };
 
     service.createTrip.mockResolvedValue(fakeTrip);
 
-    const result = await controller.createTrip({} as any);
+    const result = await controller.createTrip(fakeReq as any, {} as any);
+
     expect(result.trip.idTrip).toBe(1);
     expect(result.message).toEqual('Trip successfully requested.');
   });
 
+
   it('Should complete a trip', async () => {
+    const costTrip = 20000;
     const fakeComplete = {
       message: 'Trip successfully completed.',
       trip: {
         idTrip: 1,
         distanceKm: 12,
-        cost: 20000,
+         price: `COP $ ${costTrip}`,
         driver: 'Juan',
         passenger: 'Luna',
       },

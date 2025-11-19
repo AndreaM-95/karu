@@ -113,9 +113,9 @@ export class TripsService {
    * simplified response with trip details.
    * @returns An object containing a success message and trip information.
  */
-  async createTrip(dto: CreateTripDTO) {
-    this.logger.log(`Creating the trip for the user with ID: ${dto.passengerId}`);
-    const { passengerId, driverId, originLocationId, destinationLocationId } = dto;
+  async createTrip(userFromToken, dto: CreateTripDTO) {
+    const passengerId = userFromToken.idUser;
+    this.logger.log(`Creating the trip for the user with ID: ${passengerId}`);
 
     //Search for passenger and validate
     const passenger = await this.userRepository.findOneBy({ idUser: passengerId });
@@ -125,7 +125,7 @@ export class TripsService {
 
     //Find a female driver with vehicles
     const driver = await this.userRepository.findOne({
-      where: { idUser: driverId },
+      where: { idUser: dto.driverId },
       relations: ['drivingVehicles']
     });
 
@@ -147,10 +147,10 @@ export class TripsService {
 
     //Validate locations
     const origin = await this.locationRepository.findOneBy({
-      idLocation: originLocationId,
+      idLocation: dto.originLocationId,
     });
     const destination = await this.locationRepository.findOneBy({
-      idLocation: destinationLocationId,
+      idLocation: dto.destinationLocationId,
     });
 
     if (!origin || !destination)
@@ -206,7 +206,7 @@ export class TripsService {
         origin: origin.zone,
         destination: destination.zone,
         distanceKm,
-        cost,
+        price: `COP $ ${cost}`,
         status: savedTrip.statusTrip,
       },
     };
@@ -280,7 +280,7 @@ export class TripsService {
       trip: {
         idTrip: trip.idTrip,
         distanceKm,
-        cost,
+        price: `COP $ ${cost}`,
         driver: trip.driver.name,
         passenger: trip.passenger.name,
       },

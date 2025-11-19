@@ -2,11 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateTripDTO {
-  @ApiProperty({ example: 1, description: 'User ID' })
-  @IsNotEmpty()
-  @IsNumber()
-  passengerId: number;
-
   @ApiProperty({ example: 2, description: 'User ID' })
   @IsNotEmpty()
   @IsNumber()

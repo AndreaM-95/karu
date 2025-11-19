@@ -8,6 +8,7 @@ import {
   JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Trip } from '../../trips/entities/trip.entity';
@@ -26,47 +27,48 @@ export enum VehicleType {
 export class Vehicle {
   @PrimaryGeneratedColumn()
   idVehicle: number;
-
+ 
   @Column({ unique: true })
   plate: string;
-
+ 
   @Column({ nullable: true })
   brand: string;
-
+ 
   @Column({ nullable: true })
   model?: string;
-
+ 
   @Column({
     type: 'enum',
     enum: VehicleType,
     nullable: true,
   })
   vehicleType?: VehicleType;
-
+ 
   @Column({
     type: 'enum',
     enum: VehicleStatus,
     default: VehicleStatus.ACTIVE,
   })
   statusVehicle: VehicleStatus;
-
-  @ManyToOne(() => User, user => user.ownedVehicles, { nullable: false })
+ 
+  @ManyToOne(() => User, user => user.ownedVehicles)
+  @JoinColumn({ name: 'ownerId' })
   owner: User;
-
+ 
   @ManyToMany(() => User, user => user.drivingVehicles)
   @JoinTable({
     name: 'vehicle_drivers',
-    joinColumn: { name: 'vehicle_id', referencedColumnName: 'idVehicle' },
-    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'idUser' },
+    joinColumn: { name: 'vehicleId', referencedColumnName: 'idVehicle' },
+    inverseJoinColumn: { name: 'userId', referencedColumnName: 'idUser' },
   })
   drivers: User[];
-
+ 
   @OneToMany(() => Trip, (trip) => trip.vehicle)
   trips: Trip[];
-
+ 
   @CreateDateColumn()
   createdAt: Date;
-
+ 
   @UpdateDateColumn()
   updatedAt: Date;
 }

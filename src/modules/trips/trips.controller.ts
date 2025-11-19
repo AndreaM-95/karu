@@ -62,10 +62,11 @@ export class TripsController {
   @ApiResponse({ status: 400, description: 'Origin and destination cannot be the same' })
   @ApiResponse({ status: 400, description: 'Passenger already has an active trip' })
   @Roles(UserRole.PASSENGER)
-  async createTrip(@Body() dto: CreateTripDTO) {
-    this.logger.debug(`Trip requested by passenger with ID: ${dto.passengerId}`);
-    return this.tripsService.createTrip(dto);
+  async createTrip(@Request() req, @Body() dto: CreateTripDTO) {
+    this.logger.debug(`Trip requested by passenger with token ID: ${req.user.idUser}`);
+    return this.tripsService.createTrip(req.user, dto);
   }
+
 
   @Put('complete-trip/:tripId')
   @ApiOperation({ summary: 'End a trip' })
