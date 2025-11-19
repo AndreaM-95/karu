@@ -282,6 +282,38 @@ export class AuthService {
     };
   }
 
+  /**
+   * Retrieves the profile information for a user
+   * 
+   * @param userId - ID of the user to retrieve profile for
+   * @returns User profile data
+   * @throws NotFoundException if user not found
+   */
+  async getProfile(userId: number) {
+    this.logger.log(`Profile request for user ID: ${userId}`);
+
+    const user = await this.usersRepo.findOne({
+      where: { idUser: userId },
+      select: {
+        idUser: true,
+        name: true,
+        email: true,
+        phone: true,
+        gender: true,
+        role: true,
+        driverStatus: true,
+      },
+    });
+
+    if (!user) {
+      this.logger.warn(`Profile not found for user ID: ${userId}`);
+      throw new NotFoundException('User not found');
+    }
+
+    this.logger.log(`Profile retrieved successfully for user: ${user.email}`);
+    return user;
+  }
+
 
 
 }
