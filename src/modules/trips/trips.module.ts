@@ -4,7 +4,7 @@ import { TripsService } from './trips.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Trip } from './entities/trip.entity';
 import { Locations } from './entities/locations.entity';
-import { User } from '../users/entities/User.entity';
+import { User } from '../users/entities/user.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Trip, Locations])],

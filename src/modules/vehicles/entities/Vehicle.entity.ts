@@ -31,7 +31,7 @@ export class Vehicle {
   plate: string;
 
   @Column({ nullable: true })
-  brand: string;  // ← CAMBIAR de driverName a brand
+  brand: string;
 
   @Column({ nullable: true })
   model?: string;

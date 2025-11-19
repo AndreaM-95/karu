@@ -4,7 +4,7 @@ import { Trip, TripStatus } from './entities/trip.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Locations } from './entities/locations.entity';
 import { CustomHttpException } from 'src/common/exceptions/custom-http.exception';
-import { DriverStatus, User, UserRole } from '../users/entities/User.entity';
+import { DriverStatus, User, UserRole } from '../users/entities/user.entity';
 import { CreateTripDTO } from './dto/create-trip.dto';
 
 @Injectable()

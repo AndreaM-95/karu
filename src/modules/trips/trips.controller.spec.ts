@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TripsController } from './trips.controller';
 import { TripsService } from './trips.service';
 import { TripStatus } from './entities/trip.entity';
-import { UserRole } from '../users/entities/User.entity';
+import { UserRole } from '../users/entities/user.entity';
 
 const locationsFake = [
   { idLocation: 10, locality: 'Usaquén', zone: 'Verbenal', latitude: 4.6, longitude: -74.0, },
@@ -61,7 +61,7 @@ describe('TripsController', () => {
     expect(service.getUserTripHistory).toHaveBeenCalledWith(fakeReq.user);
     expect(result).toEqual(fakeResponseUser);
   });
-  
+
   it('Should create a trip', async () => {
     const fakeTrip = {
       message: 'Trip successfully requested.',
@@ -82,7 +82,7 @@ describe('TripsController', () => {
 
     const result = await controller.createTrip({} as any);
     expect(result.trip.idTrip).toBe(1);
-    expect(result.message).toEqual('Trip successfully requested.')
+    expect(result.message).toEqual('Trip successfully requested.');
   });
 
   it('Should complete a trip', async () => {
@@ -93,8 +93,8 @@ describe('TripsController', () => {
         distanceKm: 12,
         cost: 20000,
         driver: 'Juan',
-        passenger: 'Luna'
-      }
+        passenger: 'Luna',
+      },
     };
 
     service.completeTrip.mockResolvedValue(fakeComplete);

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TripsService } from './trips.service';
-import { UserRole } from '../users/entities/User.entity';
+import { UserRole } from '../users/entities/user.entity';
 
 const locationsFake = [
   {

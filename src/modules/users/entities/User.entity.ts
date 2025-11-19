@@ -22,7 +22,7 @@ export enum DriverStatus {
   OFFLINE = 'offline',
 }
 
-export enum LicenseCategory  {
+export enum LicenseCategory {
   A1 = 'a1',
   A2 = 'a2',
   B1 = 'b1',
@@ -31,7 +31,7 @@ export enum LicenseCategory  {
 }
 
 @Entity('users')
-export class user {
+export class User {
   @PrimaryGeneratedColumn()
   idUser: number;
 

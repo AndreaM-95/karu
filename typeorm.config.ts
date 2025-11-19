@@ -2,9 +2,9 @@ import * as dotenv from 'dotenv';
 import { User } from './src/modules/users/entities/user.entity';
 import { Trip } from './src/modules/trips/entities/trip.entity';
 import { Locations } from './src/modules/trips/entities/locations.entity';
-import { Vehicle } from './src/modules/vehicles/entities/Vehicle.entity';
-import { Payment } from './src/modules/payments/entities/Payment.entity';
-import { Rating } from './src/modules/ratings/entities/Rating.entity';
+import { Vehicle } from './src/modules/vehicles/entities/vehicle.entity';
+import { Payment } from './src/modules/payments/entities/payment.entity';
+import { Rating } from './src/modules/ratings/entities/rating.entity';
 import { DataSource } from 'typeorm';
 
 dotenv.config();

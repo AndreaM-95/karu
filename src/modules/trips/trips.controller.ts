@@ -14,7 +14,8 @@ import { TripsService } from './trips.service';
 import { CreateTripDTO } from './dto/create-trip.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt.guard';
-import { UserRole } from '../users/entities/User.entity';
+import { UserRole } from '../users/entities/user.entity';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Trips')
 @ApiBearerAuth()
