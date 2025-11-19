@@ -42,6 +42,33 @@ export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
   constructor(private readonly authService: AuthService) {}
+/**
+   * Register a new passenger user
+   * Creates a new passenger account with email, password and personal information
+   * Only female users are allowed to register as passengers
+   */
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Register a new passenger user',
+    description: 'Creates a new passenger account. Only female users are allowed to register. ' +
+                 'Email and phone must be unique.',
+  })
+  @ApiBody({ type: RegisterDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully registered. Returns access token and user information.',
+  })
+  @ApiConflictResponse({
+    description: 'Email or phone number already registered.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or non-female user attempting registration.',
+  })
+  register(@Body() dto: RegisterDto) {
+    this.logger.log(`POST /auth/register - Registration attempt for email: ${dto.email}`);
+    return this.authService.register(dto);
+  }
 
 
 }
