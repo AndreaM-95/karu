@@ -158,5 +158,47 @@ export class VehiclesService {
 
     return sanitizedVehicles;
   }
+
+  /**
+   * Finds a single vehicle by ID
+   * Includes owner, drivers, and trips information
+   *
+   * @param id - Vehicle ID
+   * @returns Vehicle with complete information
+   * @throws NotFoundException if vehicle not found
+   */
+  async findOne(id: number) {
+    this.logger.log(`Retrieving vehicle with ID: ${id}`);
+
+    const vehicle = await this.vehicleRepo.findOne({
+      where: { idVehicle: id },
+      relations: ['owner', 'drivers', 'trips'],
+    });
+
+    if (!vehicle) {
+      this.logger.warn(`Vehicle not found: ID ${id}`);
+      throw new NotFoundException('Vehicle not found');
+    }
+
+    this.logger.log(`Vehicle retrieved successfully: ${vehicle.plate} (ID: ${id})`);
+
+    return {
+      idVehicle: vehicle.idVehicle,
+      plate: vehicle.plate,
+      brand: vehicle.brand,
+      model: vehicle.model,
+      vehicleType: vehicle.vehicleType,
+      statusVehicle: vehicle.statusVehicle,
+      owner: {
+        idUser: vehicle.owner.idUser,
+        name: vehicle.owner.name,
+      },
+      drivers: vehicle.drivers.map((d) => ({
+        idUser: d.idUser,
+        name: d.name,
+      })),
+      trips: vehicle.trips,
+    };
+  }
 }
 
