@@ -224,6 +224,64 @@ export class AuthService {
     return user;
   }
 
+  /**
+   * Changes the password for an authenticated user
+   * Validates current password before allowing the change
+   * 
+   * @param dto - Password change data including current and new password
+   * @param user - Authenticated user requesting password change
+   * @returns Success message
+   * @throws NotFoundException if user not found
+   * @throws UnauthorizedException if current password is incorrect
+   * @throws BadRequestException if new password is same as current or user has no password
+   */
+  async changePassword(dto: ChangePasswordDTO, user: any) {
+    this.logger.log(`Password change request for user ID: ${user.idUser}`);
+
+    const foundUser = await this.usersRepo.findOne({
+      where: { idUser: user.idUser },
+      select: ['idUser', 'email', 'password'],
+    });
+
+    if (!foundUser) {
+      this.logger.error(`Password change failed: User not found (ID: ${user.idUser})`);
+      throw new NotFoundException('User not found');
+    }
+
+    if (!foundUser.password) {
+      this.logger.error(`Password change failed: User has no password set (${foundUser.email})`);
+      throw new BadRequestException('User has no password set');
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(dto.currentPassword, foundUser.password);
+
+    if (!isMatch) {
+      this.logger.warn(`Password change failed: Incorrect current password (${foundUser.email})`);
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    // Ensure new password is different
+    const isSamePassword = await bcrypt.compare(dto.newPassword, foundUser.password);
+
+    if (isSamePassword) {
+      this.logger.warn(`Password change failed: New password same as current (${foundUser.email})`);
+      throw new BadRequestException('New password must be different from current password');
+    }
+
+    // Hash and save new password
+    const newHash = await bcrypt.hash(dto.newPassword, 12);
+    foundUser.password = newHash;
+    await this.usersRepo.save(foundUser);
+
+    this.logger.log(`Password changed successfully for user: ${foundUser.email}`);
+
+    return {
+      message: 'Password updated successfully',
+      success: true,
+    };
+  }
+
 
 
 }
