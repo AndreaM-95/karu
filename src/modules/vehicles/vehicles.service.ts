@@ -93,6 +93,70 @@ export class VehiclesService {
     return updatedVehicle;
   }
 
-  
+  /**
+   * Finds all vehicles with optional filters
+   * Supports filtering by brand, model, status, type, owner, driver, and plate
+   *
+   * @param query - Filter criteria
+   * @returns List of vehicles with sanitized data
+   */
+  async findAll(query: QueryVehicleDto) {
+    this.logger.log('Retrieving vehicles with filters');
+
+    const qb = this.vehicleRepo
+      .createQueryBuilder('vehicle')
+      .leftJoinAndSelect('vehicle.owner', 'owner')
+      .leftJoinAndSelect('vehicle.drivers', 'driver')
+      .leftJoinAndSelect('vehicle.trips', 'trip');
+
+    if (query.brand) {
+      qb.andWhere('vehicle.brand ILIKE :brand', { brand: `%${query.brand}%` });
+    }
+    if (query.model) {
+      qb.andWhere('vehicle.model ILIKE :model', { model: `%${query.model}%` });
+    }
+    if (query.statusVehicle) {
+      qb.andWhere('vehicle.statusVehicle = :status', { status: query.statusVehicle });
+    }
+    if (query.vehicleType) {
+      qb.andWhere('vehicle.vehicleType = :type', { type: query.vehicleType });
+    }
+    if (query.ownerId) {
+      qb.andWhere('owner.idUser = :ownerId', { ownerId: query.ownerId });
+    }
+    if (query.driverId) {
+      qb.andWhere('driver.idUser = :driverId', { driverId: query.driverId });
+    }
+    if (query.plate) {
+      qb.andWhere('vehicle.plate ILIKE :plate', { plate: `%${query.plate}%` });
+    }
+
+    const vehicles = await qb.getMany();
+
+    this.logger.log(`Found ${vehicles.length} vehicles matching criteria`);
+
+    // Sanitize response data
+    const sanitizedVehicles = vehicles.map((vehicle) => ({
+      idVehicle: vehicle.idVehicle,
+      plate: vehicle.plate,
+      brand: vehicle.brand,
+      model: vehicle.model,
+      vehicleType: vehicle.vehicleType,
+      statusVehicle: vehicle.statusVehicle,
+      owner: {
+        name: vehicle.owner.name,
+        active: vehicle.owner.active,
+      },
+      drivers: vehicle.drivers.map((driver) => ({
+        name: driver.name,
+        active: driver.active,
+        driverLicense: driver.driverLicense,
+        licenseCategory: driver.licenseCategory,
+        licenseExpirationDate: driver.licenseExpirationDate,
+      })),
+    }));
+
+    return sanitizedVehicles;
+  }
 }
 
