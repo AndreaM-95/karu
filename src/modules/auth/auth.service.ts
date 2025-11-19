@@ -151,7 +151,47 @@ export class AuthService {
     return this.login(user);
   }
 
+  /**
+   * Generates JWT token and returns authentication response
+   * 
+   * @param user - User entity to generate token for
+   * @returns Object containing access token and user information
+   */
+  async login(user: User) {
+    this.logger.log(`Generating token for user: ${user.email} (ID: ${user.idUser})`);
 
+    const payload:any = {
+      sub: user.idUser,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    };
+
+    if (user.role === UserRole.DRIVER) {
+      payload.driverStatus = user.driverStatus;
+    }
+
+    const token = this.jwtService.sign(payload);
+
+    this.logger.log(`Token generated successfully for user: ${user.email}`);
+
+    const userResponse: any = {
+      idUser: user.idUser,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      active: user.active,
+    };
+
+    if (user.role === UserRole.DRIVER) {
+      userResponse.driverStatus = user.driverStatus;
+    }
+
+    return {
+      access_token: token,
+      user: userResponse,
+    };
+  }
 
 
 
