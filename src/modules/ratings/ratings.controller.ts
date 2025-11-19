@@ -35,5 +35,25 @@ export class RatingsController {
     return this.RatingService.adminGetRatingById(id);
   }
 
-  
+  @Get('myratings')
+  @Roles(UserRole.DRIVER, UserRole.PASSENGER)
+  @ApiOperation({ summary: 'Get my received ratings (driver/passenger)' })
+  @ApiResponse({status: 200,description: 'Ratings received by the user, including average score'})
+  getMyRatings(@Req() req) {
+    this.logger.debug(`User ${req.user.idUser} requested their ratings`);
+    return this.RatingService.getMyRatings(req.user);
+  }
+
+  @Post()
+  @Roles(UserRole.DRIVER, UserRole.PASSENGER)
+  @ApiOperation({ summary: 'Create a rating for a completed trip' })
+  @ApiResponse({ status: 201, description: 'Rating successfully created' })
+  @ApiResponse({ status: 400, description: 'Bad request: trip not eligible, already rated, or rating window expired'})
+  @ApiResponse({ status: 404, description: 'Trip not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden: Not a participant of this trip' })
+  createRating(@Body() dto: createRatingDTO, @Req() req) {
+    this.logger.log(`User ${req.user.idUser} is rating a trip`);
+    return this.RatingService.createRating(dto, req.user);
+  }
+
 }
