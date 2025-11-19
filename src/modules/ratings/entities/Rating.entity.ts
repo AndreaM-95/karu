@@ -15,7 +15,7 @@ export enum Status {
 }
 
 @Entity('rating')
-export class Rating {
+export class rating {
   @PrimaryGeneratedColumn()
   idRating: number;
 
