@@ -36,4 +36,22 @@ export class UsersController {
         this.logger.debug(`Admin requested user with ID: ${id}`)
         return this.userService.findById(id);
     }
+
+    @Get('rol/:rol')
+    @Roles(UserRole.ADMIN)
+    @ApiOperation({ summary: 'Get users filtered by role (admin only)',
+    description: 'Valid roles: admin, owner, driver, passenger'})
+    findByRol(@Param('rol') rol: UserRole){
+        this.logger.debug(`Admin requested users with role: ${rol}`);
+        return this.userService.findByRol(rol);
+    }
+
+    @Get('name/:name')
+    @Roles(UserRole.ADMIN, UserRole.OWNER)
+    @ApiOperation({ summary: 'Find users by name' })
+    findByNameOwner(@Param('name') name:string){
+        this.logger.debug(`Owner requested search by name: ${name}`)
+        return this.userService.findByNameOwner(name);
+    }
+    
 }

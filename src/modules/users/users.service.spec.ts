@@ -51,6 +51,50 @@ describe('UsersService', () => {
     await expect(service.findById(100)).rejects.toThrow(NotFoundException)
   });
 
+  it('shoul return user filtereb by rol', async()=>{
+    const role = UserRole.PASSENGER
+    const fakeUsers = [
+    { idUser: 1, role: UserRole.PASSENGER },
+    { idUser: 2, role: UserRole.PASSENGER }
+  ];
+    fakeUserRepo.find.mockResolvedValue(fakeUsers);
+    const result= await service.findByRol(role);
+    expect(fakeUserRepo.find).toHaveBeenCalledWith({ where: { role } });
+    expect(result.count).toBe(fakeUsers.length);
+    expect(result.users).toEqual(fakeUsers);
+  });
 
+  it('should throw BadRequestException for invalid role', async () => {
+    const invalidRole = 'helowwww' as any;
+    await expect(service.findByRol(invalidRole as UserRole)).rejects.toThrow(BadRequestException);
+  });
+
+    it('should return drivers that match the name (partial match)', async () => {
+    const name = 'Da';
+    const filt = userFake.filter(user => user.role === UserRole.DRIVER && user.name.includes('Da'));
+    fakeUserRepo.find.mockResolvedValue(filt);
+    const result = await service.findByNameOwner(name);
+    expect(fakeUserRepo.find).toHaveBeenCalledWith({
+      where: {
+        name: expect.any(Object), // Like('%Da%')
+        role: UserRole.DRIVER,
+        active: true}});
+    expect(result).toEqual(filt);
+  });
+
+  it('should throw NotFoundException if no driver matches the name', async () => {
+    fakeUserRepo.find.mockResolvedValue([]);
+    await expect(service.findByNameOwner('hnignh')).rejects.toThrow(NotFoundException);
+  });
+
+  it('should return all active drivers matching exact name', async () => {
+    const name = 'Vale';
+    const filt = userFake.filter(user => user.role === UserRole.DRIVER && user.name === 'Vale');
+    fakeUserRepo.find.mockResolvedValue(filt);
+    const result = await service.findByNameOwner(name);
+    expect(result.length).toBe(filt.length);
+    expect(result[0].name).toBe('Vale');
+  });
+  
  
 })

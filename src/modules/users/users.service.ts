@@ -35,6 +35,38 @@ UH-02: See an user by id
     this.logger.log(`User with ID ${id} found`)
     return findUser;
     }
+/*
+UH-03: See all user by rol
+* return users by rol
+*/
+    async findByRol(role: UserRole){
+        this.logger.debug(`Fetching users with role: ${role}`)
+        if (!Object.values(UserRole).includes(role)) {
+            this.logger.warn(`Invalid role provided: ${role}`)
+            throw new BadRequestException(`Invalid role: ${role}`);
+        }
+    const users = await this.userRepo.find({where: {role}})
+    this.logger.log(`${users.length} users found with role ${role}`)
+        return {count:users.length,users}
+    }
+/*
+UH-04: See an user by name
+* return user by name
+*/
+    async findByNameOwner(name: string){
+        this.logger.debug(`Searching for drivers with name like: ${name}`)
+        const findName = await this.userRepo.find({where:{
+            name:Like(`%${name}%`),
+            role: UserRole.DRIVER,
+            active: true}})
 
+        if(findName.length === 0) {
+            this.logger.warn(`No active drivers found with name: ${name}`)
+            throw new NotFoundException('Name not found')
+        }
+        this.logger.log(`${findName.length} active drivers found with name matching: ${name}`)
+        return findName;
+    }
+    
 
 }
