@@ -53,5 +53,27 @@ export class UsersController {
         this.logger.debug(`Owner requested search by name: ${name}`)
         return this.userService.findByNameOwner(name);
     }
+
+    @Post()
+    @Roles(UserRole.ADMIN)
+    @ApiOperation({ summary: 'Create a new user (admin only)' })
+    @ApiResponse({ status: 201, description: 'User created successfully' })
+    @ApiResponse({ status: 409, description: 'Email already registered' })
+    createUser(@Body() body: createUserDTO){
+        this.logger.debug(`Admin is creating a new user: ${body.email}`);
+        return this.userService.createUser(body);
+    }
+
+    @Patch(':id')
+    @Roles(UserRole.ADMIN)
+    @ApiOperation({ summary: 'Update any user (admin only)' })
+    @ApiResponse({ status: 200, description: 'User updated successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiResponse({ status: 409, description: 'Email already in use' })
+    @ApiResponse({ status: 400, description: 'Invalid role or gender' })
+    updateUserByAdmin(@Param('id', ParseIntPipe) id: number,@Body() dto: updateUserAdminDTO) {
+        this.logger.debug(`Admin updating user ID: ${id}`)
+        return this.userService.updateUserByAdmin(id, dto);
+    }
     
 }

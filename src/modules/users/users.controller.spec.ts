@@ -40,4 +40,14 @@ describe('UsersController', () => {
     expect(result).toEqual(fakeUser);
   });
 
+  it('Must update a user', async()=>{
+    const id = 2;
+    const change = { name: 'juanita', phone: '3001112233' };
+    const updatedUser = { ...userFake[1], ...change };
+    service.updateUserByAdmin.mockResolvedValue(updatedUser);
+    const result = await controller.updateUserByAdmin(id, change);
+    expect(service.updateUserByAdmin).toHaveBeenCalledWith(id, change);
+    expect(result).toEqual(updatedUser);
+  })
+
 });

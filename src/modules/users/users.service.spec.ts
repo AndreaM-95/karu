@@ -95,6 +95,167 @@ describe('UsersService', () => {
     expect(result.length).toBe(filt.length);
     expect(result[0].name).toBe('Vale');
   });
+
+  it('should create a PASSENGER user successfully', async () => {
+    const newUFake = {
+      name: 'Maria',
+      gender: Gender.FEMALE,
+      email: 'mary@mail.com',
+      phone: '3214567890',
+      dateOfBirth: '2000-01-01',
+      password: '123456',
+    role: UserRole.PASSENGER
+  };
+
+    fakeUserRepo.findOne.mockResolvedValueOnce(null); // email no existe
+
+    fakeUserRepo.create.mockReturnValue({...newUFake, idUser: 1, active: true});
+    
+    fakeUserRepo.save.mockResolvedValue({...newUFake, idUser: 1, active: true});
+    const result = await service.createUser(newUFake);
+    
+    expect(fakeUserRepo.findOne).toHaveBeenCalledWith({ where: { email: newUFake.email } });
+    expect(bcrypt.hash).toHaveBeenCalled();
+    expect(fakeUserRepo.create).toHaveBeenCalled();
+    expect(fakeUserRepo.save).toHaveBeenCalled();
+    expect(result).toEqual({message: "User has been created successfully",
+      user: expect.objectContaining({
+        idUser: 1,
+        name: newUFake .name,
+        gender: newUFake .gender,
+        email: newUFake .email,
+        phone: newUFake .phone,
+        role: newUFake .role,
+        active: true,
+        dateOfBirth: newUFake.dateOfBirth})});
+  });
+
+
+it('should throw error if user is under 18', async () => {
+  const todayFake = new Date();
+  todayFake.setFullYear(todayFake.getFullYear() - 17);
+
+  const newUFake = {
+    name: 'carlita',
+    gender: Gender.FEMALE,
+    email: 'carl@mail.com',
+    phone: '3214567890',
+    dateOfBirth: todayFake.toISOString(), 
+    password: '123456',
+    role: UserRole.PASSENGER,
+  }
+
+  await expect(service.createUser(newUFake)).rejects.toThrow('User must be at least 18 years old');
+});
+
+
+it('should throw conflict if email already exists', async () => {
+  const newUFake = {
+    name: 'danielita',
+    gender: Gender.FEMALE,
+    email: 'dami@mail.com',
+    phone: '3214567890',
+    dateOfBirth: '2000-01-01',
+    password: '123456',
+    role: UserRole.PASSENGER,
+  };
+  fakeUserRepo.findOne.mockResolvedValueOnce({ idUser: 50 });
   
+  await expect(service.createUser(newUFake)).rejects.toThrow(ConflictException);
+});
+
+
+it('should create a DRIVER user successfully', async () => {
+  const newUFake = {
+    name: 'consuelo',
+    gender: Gender.FEMALE,
+    email: 'consu@mail.com',
+    phone: '3214567890',
+    dateOfBirth: '1995-01-01',
+    password: '123456',
+    role: UserRole.DRIVER,
+    driverLicense: 12345,
+    licenseCategory: LicenseCategory.B1,
+    licenseExpirationDate: '2030-01-01',
+  };
+
+  fakeUserRepo.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null); //email y licencia no existe, entonces ok
+
+  const result = await service.createUser(newUFake);
+
+  expect(result.user.driverStatus).toBe(DriverStatus.AVAILABLE);
+  expect(result.user.driverLicense).toBe(newUFake.driverLicense);
+});
+
+
+it('should throw error if driver license is expired', async () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const newUFake = {
+    name: 'Driver Test',
+    gender: Gender.FEMALE,
+    email: 'driver@mail.com',
+    phone: '3214567890',
+    dateOfBirth: '1995-01-01',
+    password: '123456',
+    role: UserRole.DRIVER,
+    driverLicense: 12345,
+    licenseCategory: LicenseCategory.B1,
+    licenseExpirationDate: yesterday.toISOString(),
+  };
+  
+  fakeUserRepo.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null)// email y licencia no existen
+  await expect(service.createUser(newUFake))
+    .rejects.toThrow('License expiration date must be in the future'); 
+});
+
+
+it('should throw conflict if driver license already exists', async () => {
+  const newUFake = {
+    name: 'andreeeee',
+    gender: Gender.FEMALE,
+    email: 'andriiii@mail.com',
+    phone: '3214567890',
+    dateOfBirth: '1995-01-01',
+    password: '123456',
+    role: UserRole.DRIVER,
+    driverLicense: 12345,
+    licenseCategory: LicenseCategory.B1,
+    licenseExpirationDate: '2030-01-01',
+  };
+
+  fakeUserRepo.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ idUser: 99 }); // licencia duplicada, email ok
+
+  await expect(service.createUser(newUFake)).rejects.toThrow(ConflictException);
+});
+
+it('should update a user successfully', async () => {
+  fakeUserRepo.findOne
+  .mockResolvedValueOnce({idFake: 10, email: 'valii@mail.com',password: '1234568',role: UserRole.DRIVER, gender: 'female',name: 'Valery',phone: '3214567899'}).mockResolvedValueOnce(null)
+  .mockResolvedValueOnce({idUser: 10,email: 'new@mail.com',phone: '3001112233'});
+  
+  const change = {phone: '3001112233',email: 'new@mail.com'}
+  const result = await service.updateUserByAdmin(10, change);
+
+  expect(result).toEqual({message: `User 10 updated successfully`,
+    user: expect.objectContaining({idUser: 10,email: 'new@mail.com',phone: '3001112233'})});
+});
+
+
+it('should throw NotFoundException if user does not exist', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce(null);
+  await expect(service.updateUserByAdmin(1000, {})).rejects.toThrow(`User with ID 1000 not found`);
+
+});
+
+
+it('should throw ConflictException if new email already exists', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({ idUser: 20, role: UserRole.PASSENGER, gender: Gender.FEMALE, email: "old@mail.com"}).mockResolvedValueOnce({ idUser: 99 }); 
+
+  const email = { email: 'useeeee@mail.com' };
+
+  await expect(service.updateUserByAdmin(20, email)).rejects.toThrow(ConflictException);
+});
  
 })
