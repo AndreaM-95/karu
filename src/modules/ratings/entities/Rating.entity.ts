@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 import { Trip } from '../../trips/entities/trip.entity';
-import { user } from '../../users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 
 export enum Status {
   RATED = 'rated',
@@ -15,7 +15,7 @@ export enum Status {
 }
 
 @Entity('rating')
-export class rating {
+export class Rating {
   @PrimaryGeneratedColumn()
   idRating: number;
 
@@ -36,13 +36,13 @@ export class rating {
   tripId: Trip;
 
  //quien califica
-  @ManyToOne(() => user, user => user.ratingsGiven, { eager: true })
+  @ManyToOne(() => User, user => user.ratingsGiven, { eager: true })
   @JoinColumn({ name: 'authorId' })
-  author: user;  
+  author: User;  
   
   // a quien califica
-  @ManyToOne(() => user, user => user.ratingsReceived, { eager: true })
+  @ManyToOne(() => User, user => user.ratingsReceived, { eager: true })
   @JoinColumn({ name: 'targetId' })
-  target: user;
+  target: User;
 
 }

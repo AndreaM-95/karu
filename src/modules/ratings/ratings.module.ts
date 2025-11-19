@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { RatingsController } from './ratings.controller';
 import { RatingsService } from './ratings.service';
-import { rating } from 'src/modules/ratings/entities/rating.entity';
+import { Rating } from 'src/modules/ratings/entities/rating.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { user } from '../users/entities/user.entity';
-import { trip } from '../trips/entities/trip.entity';
+import { User } from '../users/entities/user.entity';
+import { Trip } from '../trips/entities/trip.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([rating, user, trip])],
+  imports: [TypeOrmModule.forFeature([Rating, User, Trip])],
   controllers: [RatingsController],
   providers: [RatingsService],
 })

@@ -1,8 +1,8 @@
-import { rating, Status } from './entities/rating.entity';
+import { Rating, Status } from './entities/rating.entity';
 import { RatingsController } from './ratings.controller';
 import { RatingsService } from './ratings.service';
 
-const fakeRatings: rating[] = [
+const fakeRatings: Rating[] = [
   {
     idRating: 1,
     score: 5,

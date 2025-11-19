@@ -11,7 +11,7 @@ import { Locations } from './locations.entity';
 import { User } from '../../users/entities/user.entity';
 import { Vehicle } from '../../vehicles/entities/vehicle.entity';
 import { Payment } from '../../payments/entities/payment.entity';
-import { Rating } from '../../ratings/entities/rating.entity';
+import { Rating } from '../../ratings/entities/Rating.entity';
 
 export enum TripStatus {
   PENDING = 'pending',

@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { DriverStatus, Gender, user, UserRole } from './entities/user.entity';
+import { DriverStatus, Gender, User, UserRole } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { createUserDTO } from './dto/createUser.dto';
 import { updateUserAdminDTO } from './dto/updateUserAdmin.dto';
@@ -11,7 +11,7 @@ import { Like, Repository } from 'typeorm';
 @Injectable()
 export class UsersService {
     private readonly logger = new Logger(UsersService.name);
-    constructor(@InjectRepository(user) private readonly userRepo: Repository<user>){}
+    constructor(@InjectRepository(User) private readonly userRepo: Repository<User>){}
 /*
 UH-01: See all users
 * return all users
@@ -146,7 +146,7 @@ UH-05: Create an user
 
   const hashedPassword = await bcrypt.hash(newUser.password, 10);
 
-  const userInfo: Partial<user> = {
+  const userInfo: Partial<User> = {
     name: newUser.name,
     gender: newUser.gender,
     email: newUser.email,
@@ -237,7 +237,7 @@ UH-06: update an user
         const updatedUser = await this.userRepo.findOne({ where: { idUser: id }})
         this.logger.log(`User with ID ${id} updated successfully`)
         
-        return{message: `User ${id} updated successfully`,user: updatedUser as user}
+        return{message: `User ${id} updated successfully`,user: updatedUser as User}
 
     }
 /*

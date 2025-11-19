@@ -1,8 +1,8 @@
 import {  HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { rating, Status } from './entities/rating.entity';
+import { Rating, Status } from './entities/rating.entity';
 import { LessThan, Repository } from 'typeorm';
-import { DriverStatus, user, UserRole } from '../users/entities/user.entity';
+import { DriverStatus, User, UserRole } from '../users/entities/user.entity';
 import { Trip, TripStatus } from '../trips/entities/trip.entity';
 import { CustomHttpException } from 'src/common/exceptions/custom-http.exception';
 import { createRatingDTO } from './dto/createRating.dto';
@@ -11,10 +11,10 @@ import { createRatingDTO } from './dto/createRating.dto';
 export class RatingsService {
   private readonly logger = new Logger(RatingsService.name);
   constructor(
-    @InjectRepository(rating)
-    private readonly ratingRepo: Repository<rating>, 
-    @InjectRepository(user)
-    private userRepo: Repository<user>, 
+    @InjectRepository(Rating)
+    private readonly ratingRepo: Repository<Rating>, 
+    @InjectRepository(User)
+    private userRepo: Repository<User>, 
     @InjectRepository(Trip)
     private tripRepo: Repository<Trip>){}
 
@@ -70,7 +70,7 @@ return: rating seached by id
 /*UH-03: see rating own user
 return: all rating by user
 */
-  async getMyRatings(user: user) {
+  async getMyRatings(user: User) {
     this.logger.debug(`Fetching ratings received by user ID: ${user.idUser}`)
     
       if (user.role !== UserRole.DRIVER && user.role !== UserRole.PASSENGER) {
@@ -120,7 +120,7 @@ return: all rating by user
 
 /*validate the trip just rated by passenger and driver
 */
-    validateUser(user: user, trip: Trip) {
+    validateUser(user: User, trip: Trip) {
     this.logger.debug(`Validating if user ${user.idUser} participated in trip ${trip.idTrip}`)
     if (user.role !== UserRole.DRIVER && user.role !== UserRole.PASSENGER) {
       this.logger.warn(`Invalid role for rating: ${user.role}`)
@@ -162,7 +162,7 @@ return: all rating by user
 
 /*block the user if user have 5 ratings "bad"
 */
-  async blockUser(user: user) {
+  async blockUser(user: User) {
     this.logger.debug(`Checking if user ${user.idUser} needs to be blocked`)
     const lowRatings = await this.ratingRepo.count({where: {
         target: { idUser: user.idUser },
@@ -185,7 +185,7 @@ return: all rating by user
 
 /*UH-04: create a rating
 */
-  async createRating(dto: createRatingDTO, user: user) {
+  async createRating(dto: createRatingDTO, user: User) {
       this.logger.debug(`User ${user.idUser} creating rating for trip ${dto.tripId}`)
     const trip = await this.validateTripExists(dto.tripId);
 
