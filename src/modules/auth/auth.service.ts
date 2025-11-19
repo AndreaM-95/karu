@@ -193,6 +193,37 @@ export class AuthService {
     };
   }
 
+  /**
+   * Validates user credentials for local authentication strategy
+   * 
+   * @param email - User's email address
+   * @param pass - User's plain text password
+   * @returns User entity if credentials are valid, null otherwise
+   */
+  async validateUser(email: string, pass: string) {
+    this.logger.log(`Login attempt for email: ${email}`);
+
+    const user = await this.usersRepo.findOne({
+      where: { email },
+      select: ['idUser', 'email', 'password', 'role', 'active', 'name', 'driverStatus'],
+    });
+
+    if (!user) {
+      this.logger.warn(`Login failed: User not found (${email})`);
+      return null;
+    }
+
+    const isMatch = await bcrypt.compare(pass, user.password);
+
+    if (!isMatch) {
+      this.logger.warn(`Login failed: Invalid password for user (${email})`);
+      return null;
+    }
+
+    this.logger.log(`User validated successfully: ${email} (ID: ${user.idUser})`);
+    return user;
+  }
+
 
 
 }
