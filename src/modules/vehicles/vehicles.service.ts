@@ -116,7 +116,7 @@ export class VehiclesService {
 
     return savedVehicle;
   }
-  
+
   /**
    * Assigns a driver to a vehicle
    * Prevents duplicate assignments
@@ -346,6 +346,61 @@ export class VehiclesService {
         licenseCategory: driver.licenseCategory,
         licenseExpirationDate: driver.licenseExpirationDate,
       })),
+    }));
+  }
+
+  /**
+   * Finds all vehicles assigned to a specific driver
+   *
+   * @param driverId - Driver user ID
+   * @returns List of vehicles assigned to the driver
+   * @throws NotFoundException if driver not found
+   * @throws BadRequestException if user is not a driver
+   */
+  async findByDriver(driverId: number) {
+    this.logger.log(`Retrieving vehicles for driver ID: ${driverId}`);
+
+    const driver = await this.userRepo.findOne({
+      where: { idUser: driverId },
+      select: ['idUser', 'role', 'name'],
+    });
+
+    if (!driver) {
+      this.logger.warn(`Driver not found: ID ${driverId}`);
+      throw new NotFoundException(`User with ID ${driverId} not found`);
+    }
+
+    if (driver.role !== UserRole.DRIVER) {
+      this.logger.warn(`User ${driver.name} (ID: ${driverId}) is not a driver`);
+      throw new BadRequestException(`User with ID ${driverId} is not a driver`);
+    }
+
+    const vehicles = await this.vehicleRepo.find({
+      where: { drivers: { idUser: driverId } },
+      relations: ['owner', 'drivers'],
+    });
+
+    if (vehicles.length === 0) {
+      this.logger.log(`Driver ${driver.name} has no vehicles assigned`);
+      return {
+        message: `Driver ${driver.name} has no vehicles assigned`,
+        vehicles: [],
+      };
+    }
+
+    this.logger.log(`Found ${vehicles.length} vehicles for driver: ${driver.name}`);
+
+    return vehicles.map((vehicle) => ({
+      idVehicle: vehicle.idVehicle,
+      plate: vehicle.plate,
+      brand: vehicle.brand,
+      model: vehicle.model,
+      vehicleType: vehicle.vehicleType,
+      statusVehicle: vehicle.statusVehicle,
+      owner: {
+        idUser: vehicle.owner.idUser,
+        name: vehicle.owner.name,
+      },
     }));
   }
 
