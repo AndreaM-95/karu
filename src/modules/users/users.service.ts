@@ -188,7 +188,8 @@ const userWithoutPassword: Record<string, any> = { ...user }
 
 /*
 UH-06: update an user
-* * the administrator can update all users, owner, driver, cannot
+* the administrator can update all users, owner, driver, cannot
+* validate the email is not already registered
 * encrypt the password
 * validate rol, gender
 */
@@ -239,6 +240,129 @@ UH-06: update an user
         return{message: `User ${id} updated successfully`,user: updatedUser as user}
 
     }
+/*
+UH-07: passenger can update their own information
+* validate the users role=> Passenger
+*validate the email is not already registered
+*validate the phone is not already registered in other passenger
+*/
+    async updateOnlyPassenger(myIdL: number, dto: updateUserSelfDTO) {
+        this.logger.debug(`Passenger ${myIdL} updating their profile`)
+        const userUpdate = await this.userRepo.findOne({ where: { idUser: myIdL } });
 
+    if (!userUpdate) {
+        this.logger.warn(`Passenger ${myIdL} not found`)
+        throw new NotFoundException(`User not found`);
+    }
 
+    if (userUpdate.role !== UserRole.PASSENGER) {
+        this.logger.warn(`User ${myIdL} is not a passenger`)
+        throw new ForbiddenException(`Your role is ${userUpdate.role}. This endpoint is only for passengers.`);
+    }
+
+    if (dto.email && dto.email !== userUpdate.email) {
+      const existEmail = await this.userRepo.findOne({ where: { email: dto.email }})
+      if (existEmail) {
+        this.logger.warn(`Email ${dto.email} already in use`)
+        throw new ConflictException(`Email ${dto.email} is already in use`);
+      }
+    }
+
+    if (dto.phone && dto.phone !== userUpdate.phone) {
+        const phoneExists = await this.userRepo.findOne({ where: { phone: dto.phone, role: UserRole.PASSENGER} });
+        if (phoneExists) {
+            this.logger.warn(`Phone ${dto.phone} already in use by another passenger`)
+            throw new ConflictException(`Phone ${dto.phone} is already in use by another passenger`);
+        }
+    }
+
+    if (dto.password) {
+        dto.password = await bcrypt.hash(dto.password, 10);
+    }
+
+    await this.userRepo.update(myIdL, dto)
+    const updatedUser = await this.userRepo.findOne({ where: { idUser: myIdL }})
+    this.logger.log(`Passenger ${myIdL} profile updated successfully`)
+    return {message: "Your profile was updated successfully", user:updatedUser}
+
+    }
+/*
+UH-08: update drivers status
+* found driver and validate the role 
+*validate status and who want change it
+*change ststus=>offline
+*/
+    async updateDriverStatus(DriverId: number, dto: updateDriverStatusDTO, requesterId: number, requesterRole: UserRole) {
+        this.logger.debug(`Updating driver ${DriverId} status to ${dto.driverStatus} by requester ${requesterId} (${requesterRole})`)
+        const driver = await this.userRepo.findOne({ where: { idUser: DriverId } });
+
+    if (!driver) {
+        this.logger.warn(`Driver with ID ${DriverId} not found`)
+        throw new NotFoundException(`Driver with ID ${DriverId} not found`);
+    }
+
+    if (driver.role !== UserRole.DRIVER) {
+        this.logger.warn(`User ${DriverId} is not a driver`)
+        throw new BadRequestException(`User ${DriverId} is not a driver`);
+    }
+
+    if (!driver.active) {
+        this.logger.warn(`Driver ${DriverId} is inactive`)
+        throw new BadRequestException(`Driver ${DriverId} is inactive and cannot change status`);
+    }
+    
+    switch (requesterRole) {
+        case UserRole.DRIVER:
+            if (requesterId !== DriverId) {
+                this.logger.warn(`Driver ${requesterId} tried to change status of driver ${DriverId}`)
+                throw new ForbiddenException('Drivers can only change their own status')
+            }
+        break;
+        case UserRole.ADMIN:
+            break;
+            default:
+                this.logger.warn(`User ${requesterId} with role ${requesterRole} cannot change driver status`)
+                throw new ForbiddenException(`Your role is ${requesterRole}. You cannot change driver status.`)
+        }
+
+    await this.userRepo.update(DriverId, { driverStatus: dto.driverStatus })
+    
+    const updatedDriver = await this.userRepo.findOne({ where: { idUser: DriverId}})
+    
+    this.logger.log(`Driver ${DriverId} status updated to ${dto.driverStatus}`)
+    
+    return {message: `Driver status updated to ${dto.driverStatus}`,user: updatedDriver}
+    }
+/*
+UH-09: desactive user
+*validate user exist
+*validate user is false already
+*if user is driver=> change the driver status to offline first
+*change status user=>false
+*/
+    async desactivateUser(id: number){
+        this.logger.debug(`Deactivating user with ID: ${id}`)
+        const remove = await this.userRepo.findOne({ where: { idUser: id } });
+
+        if(!remove){
+            this.logger.warn(`User with ID ${id} not found`)
+            throw new NotFoundException(`Not found user with id ${id}`)
+        }
+
+        if (!remove.active) {
+            this.logger.warn(`User ${id} is already inactive`)
+            throw new BadRequestException(`User ${id} is already inactive`);
+        }
+
+        if (remove.role === UserRole.DRIVER) {
+            remove.driverStatus = DriverStatus.OFFLINE
+            this.logger.debug(`Driver ${id} status set to OFFLINE`)
+        }
+
+        remove.active = false;
+        await this.userRepo.save(remove)
+        this.logger.log(`User with ID ${id} deactivated successfully`)
+        
+        return {message: `User with id ${id} has been desactivated successfully`}
+    }
 }

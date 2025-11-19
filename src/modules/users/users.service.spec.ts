@@ -257,5 +257,163 @@ it('should throw ConflictException if new email already exists', async () => {
 
   await expect(service.updateUserByAdmin(20, email)).rejects.toThrow(ConflictException);
 });
+
+
+it('should set driverStatus AVAILABLE when role changes to DRIVER', async () => {
+  const updateFake = {idUser: 7,email: 'pepi@mail.com',role: UserRole.PASSENGER,gender: Gender.FEMALE,driverStatus: null};
+
+  fakeUserRepo.findOne.mockResolvedValueOnce(updateFake).mockResolvedValueOnce({...updateFake,role: UserRole.DRIVER,driverStatus: DriverStatus.AVAILABLE});
+
+  const change = { role: UserRole.DRIVER };
+
+  const result = await service.updateUserByAdmin(7, change );
+
+  expect(fakeUserRepo.update).toHaveBeenCalledWith(7, {...change , driverStatus: DriverStatus.AVAILABLE});
+
+  expect(result.user.driverStatus).toBe(DriverStatus.AVAILABLE);
+});
+
+
+it('should set driverStatus null when role changes away from DRIVER', async () => {
+  const updateFake = {idUser: 8,email: 'dri@mail.com',role: UserRole.DRIVER,gender: Gender.FEMALE,driverStatus: DriverStatus.AVAILABLE};
+
+  fakeUserRepo.findOne.mockResolvedValueOnce(updateFake).mockResolvedValueOnce({...updateFake,role: UserRole.PASSENGER,driverStatus: null});
+
+  const change  = { role: UserRole.PASSENGER };
+
+  const result = await service.updateUserByAdmin(8, change );
+
+  expect(result.user.driverStatus).toBe(null);
+});
+
+
+it('should keep driverStatus unchanged if role is not changed', async () => {
+  const updateFake = {idUser: 9,email: 'heyyy@mail.com',role: UserRole.DRIVER,gender: Gender.FEMALE, driverStatus: DriverStatus.AVAILABLE};
+
+  fakeUserRepo.findOne.mockResolvedValueOnce(updateFake).mockResolvedValueOnce(updateFake);
+
+  const change  = { phone: '3009998888' };
+
+  const result = await service.updateUserByAdmin(9, change );
+
+  expect(fakeUserRepo.update).toHaveBeenCalledWith(9, {...change ,driverStatus: DriverStatus.AVAILABLE});
+
+  expect(result.user.driverStatus).toBe(DriverStatus.AVAILABLE);
+});
+
+
+it('should throw NotFoundException if driver does not exist', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce(null);
+
+  await expect(service.updateDriverStatus(50, { driverStatus: DriverStatus.AVAILABLE }, 1, UserRole.ADMIN))
+  .rejects.toThrow(NotFoundException);
+});
+
+
+it('should throw BadRequestException if user is not a driver', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({idUser: 20,role: UserRole.PASSENGER,active: true});
+
+  await expect(service.updateDriverStatus(20, { driverStatus: DriverStatus.BUSY }, 1, UserRole.ADMIN))
+  .rejects.toThrow(BadRequestException);
+});
+
+
+it('should throw BadRequestException if driver is inactive', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({idUser: 30,role: UserRole.DRIVER,active: false});
+
+  await expect(service.updateDriverStatus(30, { driverStatus: DriverStatus.OFFLINE }, 1, UserRole.ADMIN))
+  .rejects.toThrow(BadRequestException);
+});
+
+
+it('should throw ForbiddenException if driver tries to change another driver status', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({idUser: 10,role: UserRole.DRIVER,active: true});
+
+  await expect(service.updateDriverStatus(10, { driverStatus: DriverStatus.AVAILABLE }, 99, UserRole.DRIVER))
+  .rejects.toThrow(ForbiddenException);
+});
+
+
+it('should throw ForbiddenException for roles other than DRIVER or ADMIN', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({idUser: 11, role: UserRole.DRIVER, active: true});
+
+  await expect(service.updateDriverStatus(11, { driverStatus: DriverStatus.AVAILABLE }, 200, UserRole.PASSENGER))
+  .rejects.toThrow(ForbiddenException);
+});
+
+
+it('should update driver status successfully when requester is ADMIN', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({idUser: 40,role: UserRole.DRIVER,active: true})
+  .mockResolvedValueOnce({idUser: 40,role: UserRole.DRIVER, driverStatus: DriverStatus.AVAILABLE});
+
+  fakeUserRepo.update.mockResolvedValueOnce({ affected: 1 });
+
+  const change = { driverStatus: DriverStatus.AVAILABLE };
+
+  const result = await service.updateDriverStatus(40, change, 1, UserRole.ADMIN);
+
+  expect(fakeUserRepo.update).toHaveBeenCalledWith(40, { driverStatus: change.driverStatus });
+
+  expect(result).toEqual({message: `Driver status updated to ${change.driverStatus}`,
+    user: expect.objectContaining({idUser: 40, driverStatus: DriverStatus.AVAILABLE})});
+
+});
+
+
+it('should allow a driver to change their own status', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({idUser: 22,role: UserRole.DRIVER,active: true})
+    .mockResolvedValueOnce({idUser: 22,role: UserRole.DRIVER,driverStatus: DriverStatus.BUSY});
+
+  fakeUserRepo.update.mockResolvedValueOnce({ affected: 1 });
+
+  const change = { driverStatus: DriverStatus.BUSY };
+
+  const result = await service.updateDriverStatus(22, change, 22, UserRole.DRIVER);
+
+  expect(result).toEqual({message: `Driver status updated to ${change.driverStatus}`,
+  user: expect.objectContaining({ idUser: 22, driverStatus: DriverStatus.BUSY})});
+
+});
+
+it('should throw NotFoundException if user does not exist', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce(null);
+
+  await expect(service.desactivateUser(20)).rejects.toThrow(NotFoundException);
+
+});
+
+it('should throw BadRequestException if user is already inactive', async () => {
+  fakeUserRepo.findOne.mockResolvedValueOnce({idUser: 15,active: false, role: UserRole.PASSENGER});
+
+  await expect(service.desactivateUser(15)).rejects.toThrow(BadRequestException);
+
+});
+
+it('should set driverStatus OFFLINE when deactivating a DRIVER', async () => {
+  const driverFake = {idUser: 30, name: "Maria", role: UserRole.DRIVER, active: true, driverStatus: DriverStatus.AVAILABLE};
+
+  fakeUserRepo.findOne.mockResolvedValueOnce({...driverFake});
+  fakeUserRepo.save.mockResolvedValueOnce({idUser: 30, name: "Maria", role: UserRole.DRIVER, active: false, driverStatus: DriverStatus.OFFLINE});
+
+  const result = await service.desactivateUser(30);
+
+  expect(fakeUserRepo.save).toHaveBeenCalledWith({idUser: 30, name: "Maria", role: UserRole.DRIVER, active: false, driverStatus: DriverStatus.OFFLINE});
+
+  expect(result).toEqual({ message: `User with id 30 has been desactivated successfully`});
+});
+
+it('should deactivate a user successfully', async () => {
+  const removeFake = {idUser: 40, role: UserRole.PASSENGER, active: true};
+
+  fakeUserRepo.findOne.mockResolvedValueOnce({...removeFake});
+  fakeUserRepo.save.mockResolvedValueOnce({idUser: 40, role: UserRole.PASSENGER, active: false});
+
+  const result = await service.desactivateUser(40);
+
+  expect(fakeUserRepo.save).toHaveBeenCalledWith({idUser: 40, role: UserRole.PASSENGER, active: false});
+
+  expect(result).toEqual({ message: `User with id 40 has been desactivated successfully`});
+
+});
  
 })

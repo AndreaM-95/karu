@@ -50,4 +50,24 @@ describe('UsersController', () => {
     expect(result).toEqual(updatedUser);
   })
 
+  it('Must update driverStatus succesfully', async () => {
+  const driverId = 10;
+  const change = { driverStatus: DriverStatus.OFFLINE };
+  const req= {user: {idUser: 99, role: UserRole.ADMIN}};
+  const response = { message: 'Driver status updated' };
+  service.updateDriverStatus.mockResolvedValue(response);
+  const result = await controller.updateDriverStatus(driverId, change, req);
+  expect(service.updateDriverStatus).toHaveBeenCalledWith(driverId,change,req.user.idUser,req.user.role);
+  expect(result).toEqual(response);
+});
+
+
+  it('Must desactivate a user by id ', async () => {
+    const id = 3;
+    const response = { message: `User with id ${id} has been desactivated successfully` };
+    service.desactivateUser.mockResolvedValue(response);
+    const result = await controller.desactivateUser(id);
+    expect(service.desactivateUser).toHaveBeenCalledWith(id);
+    expect(result).toEqual(response);
+});
 });

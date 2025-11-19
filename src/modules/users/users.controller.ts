@@ -75,5 +75,38 @@ export class UsersController {
         this.logger.debug(`Admin updating user ID: ${id}`)
         return this.userService.updateUserByAdmin(id, dto);
     }
-    
+
+    @Patch('passenger/me')
+    @Roles(UserRole.PASSENGER)
+    @ApiOperation({ summary: 'Passenger updates their own profile' })
+    @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+    @ApiResponse({ status: 403, description: 'Only passengers can use this endpoint' })
+    @ApiResponse({ status: 409, description: 'Email or phone already in use' })
+    updateOnlyPassenger(@Req() req, @Body() dto: updateUserSelfDTO) {
+        this.logger.debug(`Passenger ${req.user.idUser} updating profile`)
+        return this.userService.updateOnlyPassenger(req.user.idUser, dto);
+    }
+
+    @Patch('driverStatus/:Driverid')
+    @Roles(UserRole.ADMIN, UserRole.DRIVER)
+    @ApiOperation({ summary: 'Update driver availability status' })
+    @ApiResponse({ status: 200, description: 'Driver status updated' })
+    @ApiResponse({ status: 404, description: 'Driver not found' })
+    @ApiResponse({ status: 400, description: 'User is not a driver or is inactive' })
+    @ApiResponse({ status: 403, description: 'Drivers can only change their own status' })
+    updateDriverStatus(@Param('Driverid', ParseIntPipe) Driverid: number,@Body() dto: updateDriverStatusDTO,@Req() req) {
+        this.logger.debug(`User ${req.user.idUser} updating driver status for driver ${Driverid}`,)
+        return this.userService.updateDriverStatus(Driverid, dto, req.user.idUser, req.user.role);
+    }
+
+    @Delete(':id')
+    @Roles(UserRole.ADMIN)
+    @ApiOperation({ summary: 'Deactivate a user' })
+    @ApiResponse({ status: 200, description: 'User deactivated successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiResponse({ status: 400, description: 'User is already inactive' })
+    desactivateUser(@Param('id', ParseIntPipe) id: number){
+        this.logger.warn(`Admin deactivating user ID: ${id}`)
+        return this.userService.desactivateUser(id);
+    }
 }
