@@ -175,4 +175,30 @@ export class AuthController {
     return this.authService.changePassword(dto, req.user);
   }
 
+  /**
+   * Get current user profile
+   * Retrieves profile information for the authenticated user
+   * Includes personal details and role information
+   */
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get current user profile',
+    description: 'Returns the profile information of the authenticated user, ' +
+                 'including name, email, phone, gender, role, and driver status (if applicable).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile retrieved successfully.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Not authenticated or invalid token.',
+  })
+  async getProfile(@Request() req) {
+    this.logger.log(`GET /auth/me - Profile request for user ID: ${req.user.idUser}`);
+    return this.authService.getProfile(req.user.idUser);
+  }
+
 }
