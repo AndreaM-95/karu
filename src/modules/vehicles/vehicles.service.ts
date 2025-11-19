@@ -31,6 +31,92 @@ export class VehiclesService {
     private readonly tripRepo: Repository<Trip>,
   ) {}
 
+    /**
+   * Creates a new vehicle
+   * Owners can only create vehicles for themselves
+   * Admins can create vehicles for any owner
+   *
+   * @param dto - Vehicle creation data
+   * @param loggedUser - The authenticated user creating the vehicle
+   * @returns Created vehicle with owner information
+   * @throws ForbiddenException if user is not authorized
+   * @throws NotFoundException if owner not found
+   * @throws BadRequestException if plate already exists or user is not an owner
+   */
+  async createVehicle(dto: CreateVehicleDto, loggedUser: User) {
+    this.logger.log(
+      `Vehicle creation attempt by user: ${loggedUser.email} (Role: ${loggedUser.role})`,
+    );
+
+    let ownerIdToAssign: number;
+
+    if (loggedUser.role === UserRole.OWNER) {
+      if (dto.ownerId && dto.ownerId !== loggedUser.idUser) {
+        this.logger.warn(
+          `Owner ${loggedUser.email} attempted to assign vehicle to another owner`,
+        );
+        throw new ForbiddenException('You cannot assign vehicles to other owners');
+      }
+      ownerIdToAssign = loggedUser.idUser;
+    } else if (loggedUser.role === UserRole.ADMIN) {
+      if (!dto.ownerId) {
+        this.logger.warn('Admin attempted to create vehicle without specifying ownerId');
+        throw new BadRequestException('ownerId is required for admin');
+      }
+      ownerIdToAssign = dto.ownerId;
+    } else {
+      this.logger.warn(
+        `User ${loggedUser.email} with role ${loggedUser.role} attempted to create vehicle`,
+      );
+      throw new ForbiddenException('You are not allowed to create vehicles');
+    }
+
+    // Verify owner exists and has correct role
+    const owner = await this.userRepo.findOne({
+      where: { idUser: ownerIdToAssign },
+    });
+
+    if (!owner) {
+      this.logger.warn(`Owner not found with ID: ${ownerIdToAssign}`);
+      throw new NotFoundException('Owner not found');
+    }
+
+    if (owner.role !== UserRole.OWNER) {
+      this.logger.warn(
+        `User ${owner.email} (ID: ${owner.idUser}) is not an owner, cannot create vehicle`,
+      );
+      throw new BadRequestException('The user is not an owner');
+    }
+
+    // Check if plate already exists
+    const exists = await this.vehicleRepo.findOne({
+      where: { plate: dto.plate },
+    });
+
+    if (exists) {
+      this.logger.warn(`Vehicle creation failed: Plate already registered (${dto.plate})`);
+      throw new BadRequestException('This plate is already registered');
+    }
+
+    // Create vehicle
+    const vehicle = this.vehicleRepo.create({
+      plate: dto.plate,
+      brand: dto.brand,
+      model: dto.model,
+      vehicleType: dto.vehicleType,
+      owner,
+      statusVehicle: VehicleStatus.ACTIVE,
+    });
+
+    const savedVehicle = await this.vehicleRepo.save(vehicle);
+
+    this.logger.log(
+      `Vehicle created successfully: ${savedVehicle.plate} (ID: ${savedVehicle.idVehicle}) for owner: ${owner.name}`,
+    );
+
+    return savedVehicle;
+  }
+  
   /**
    * Assigns a driver to a vehicle
    * Prevents duplicate assignments
@@ -200,5 +286,69 @@ export class VehiclesService {
       trips: vehicle.trips,
     };
   }
+
+   /**
+   * Finds all vehicles owned by a specific owner
+   *
+   * @param ownerId - Owner user ID
+   * @returns List of vehicles owned by the user
+   * @throws NotFoundException if owner not found
+   * @throws BadRequestException if user is not an owner
+   */
+  async findByOwner(ownerId: number) {
+    this.logger.log(`Retrieving vehicles for owner ID: ${ownerId}`);
+
+    const owner = await this.userRepo.findOne({
+      where: { idUser: ownerId },
+      select: ['idUser', 'role', 'name'],
+    });
+
+    if (!owner) {
+      this.logger.warn(`Owner not found: ID ${ownerId}`);
+      throw new NotFoundException(`User with ID ${ownerId} not found`);
+    }
+
+    if (owner.role !== UserRole.OWNER) {
+      this.logger.warn(`User ${owner.name} (ID: ${ownerId}) is not an owner`);
+      throw new BadRequestException(`User with ID ${ownerId} is not an owner`);
+    }
+
+    const vehicles = await this.vehicleRepo.find({
+      where: { owner: { idUser: ownerId } },
+      relations: ['drivers', 'owner'],
+    });
+
+    if (vehicles.length === 0) {
+      this.logger.log(`Owner ${owner.name} has no vehicles registered`);
+      return {
+        message: `Owner ${owner.name} has no vehicles registered`,
+        vehicles: [],
+      };
+    }
+
+    this.logger.log(`Found ${vehicles.length} vehicles for owner: ${owner.name}`);
+
+    return vehicles.map((vehicle) => ({
+      idVehicle: vehicle.idVehicle,
+      plate: vehicle.plate,
+      brand: vehicle.brand,
+      model: vehicle.model,
+      vehicleType: vehicle.vehicleType,
+      statusVehicle: vehicle.statusVehicle,
+      owner: {
+        idUser: vehicle.owner.idUser,
+        name: vehicle.owner.name,
+      },
+      drivers: vehicle.drivers.map((driver) => ({
+        idUser: driver.idUser,
+        name: driver.name,
+        driverLicense: driver.driverLicense,
+        licenseCategory: driver.licenseCategory,
+        licenseExpirationDate: driver.licenseExpirationDate,
+      })),
+    }));
+  }
+
+
 }
 
