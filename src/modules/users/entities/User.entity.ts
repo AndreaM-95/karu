@@ -1,8 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { IsEmail, IsNotEmpty, Length } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from 'typeorm';
 import { Trip } from '../../trips/entities/trip.entity';
-import { Rating } from '../../ratings/entities/Rating.entity';
-import { Vehicle } from '../../vehicles/entities/Vehicle.entity';
+import { Vehicle } from '../../vehicles/entities/vehicle.entity';
+import { Rating } from '../../ratings/entities/rating.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -23,27 +22,35 @@ export enum DriverStatus {
   OFFLINE = 'offline',
 }
 
+export enum LicenseCategory  {
+  A1 = 'a1',
+  A2 = 'a2',
+  B1 = 'b1',
+  B2 = 'b2',
+  B3 = 'b3',
+}
+
 @Entity('users')
-export class User {
+export class user {
   @PrimaryGeneratedColumn()
   idUser: number;
 
   @Column()
-  @IsNotEmpty()
   name: string;
 
   @Column({ type: 'enum', enum: Gender, default: Gender.FEMALE })
   gender: Gender;
 
   @Column({ unique: true })
-  @IsEmail()
   email: string;
 
-  @Column({ unique: true })
-  @Length(10, 20)
-  phone: number;
-
   @Column()
+  phone: string;
+
+  @Column({ type: 'date', nullable: true })
+  dateOfBirth: Date|null;
+
+  @Column({ select: false })
   password: string;
 
   @Column({ default: true })
@@ -55,10 +62,23 @@ export class User {
   @Column({
     type: 'enum',
     enum: DriverStatus,
-    default: DriverStatus.OFFLINE,
+    nullable: true,
+    default: null,
+  })
+  driverStatus: DriverStatus | null;
+
+  @Column({ type: 'int', nullable: true })
+  driverLicense: number | null;
+
+  @Column({
+    type: 'enum',
+    enum: LicenseCategory ,
     nullable: true,
   })
-  driverStatus: DriverStatus;
+  licenseCategory: LicenseCategory  | null;
+
+  @Column({ type: 'date', nullable: true })
+  licenseExpirationDate: Date | null;
 
   @OneToMany(() => Vehicle, (vehicle) => vehicle.owner)
   vehicles: Vehicle[];
@@ -69,9 +89,15 @@ export class User {
   @OneToMany(() => Trip, (trip) => trip.driver)
   driverTrips: Trip[];
 
-  @OneToMany(() => Rating, (rating) => rating.passenger)
-  givenRatings: Rating[];
+  @OneToMany(() => Rating, (rating) => rating.author)
+  ratingsGiven: Rating[];
 
-  @OneToMany(() => Rating, (rating) => rating.driver)
-  receivedRatings: Rating[];
+  @OneToMany(() => Rating, (rating) => rating.target)
+  ratingsReceived: Rating[];
+
+  @OneToMany(() => Vehicle, vehicle => vehicle.owner)
+  ownedVehicles: Vehicle[];
+
+  @ManyToMany(() => Vehicle, vehicle => vehicle.drivers)
+  drivingVehicles: Vehicle[];
 }

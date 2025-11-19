@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { User } from './src/modules/users/entities/User.entity';
+import { User } from './src/modules/users/entities/user.entity';
 import { Trip } from './src/modules/trips/entities/trip.entity';
 import { Locations } from './src/modules/trips/entities/locations.entity';
 import { Vehicle } from './src/modules/vehicles/entities/Vehicle.entity';

@@ -8,7 +8,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Locations } from './locations.entity';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { Vehicle } from '../../vehicles/entities/Vehicle.entity';
 import { Payment } from '../../payments/entities/Payment.entity';
 import { Rating } from '../../ratings/entities/Rating.entity';
