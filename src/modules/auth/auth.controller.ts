@@ -145,4 +145,34 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  /**
+   * Change user password
+   * Allows authenticated users to update their password
+   * Requires current password for security verification
+   */
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Change user password',
+    description: 'Allows authenticated users to change their password. ' +
+                 'Requires current password for verification. New password must be different from current.',
+  })
+  @ApiBody({ type: ChangePasswordDTO })
+  @ApiResponse({
+    status: 200,
+    description: 'Password changed successfully.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Not authenticated, invalid token, or incorrect current password.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid password format, passwords do not match, or new password is same as current.',
+  })
+  async changePassword(@Body() dto: ChangePasswordDTO, @Request() req) {
+    this.logger.log(`POST /auth/change-password - Password change request for user ID: ${req.user.idUser}`);
+    return this.authService.changePassword(dto, req.user);
+  }
+
 }
