@@ -67,7 +67,6 @@ export class user {
   })
   driverStatus: DriverStatus | null;
 
-  // Campos exclusivos para conductores
   @Column({ type: 'int', nullable: true })
   driverLicense: number | null;
 
@@ -96,11 +95,9 @@ export class user {
   @OneToMany(() => Rating, (rating) => rating.target)
   ratingsReceived: Rating[];
 
-  // Relación: un usuario puede ser propietario de varios vehículos
   @OneToMany(() => Vehicle, vehicle => vehicle.owner)
   ownedVehicles: Vehicle[];
 
-  // Relación: un usuario puede conducir varios vehículos
   @ManyToMany(() => Vehicle, vehicle => vehicle.drivers)
   drivingVehicles: Vehicle[];
 }
