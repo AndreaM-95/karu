@@ -495,7 +495,7 @@ export class VehiclesService {
     }
 
     // Validate status against enum
-    if (!(status in VehicleStatus)) {
+    if (!Object.values(VehicleStatus).includes(status as VehicleStatus)) {
       this.logger.warn(`Invalid vehicle status provided: ${status}`);
       throw new BadRequestException('Invalid vehicle status');
     }

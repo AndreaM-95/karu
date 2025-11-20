@@ -163,9 +163,9 @@ describe('VehiclesService', () => {
         model: 'Test',
       };
 
-      await expect(service.createVehicle(dto, passenger as User)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        service.createVehicle(dto, passenger as User),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw NotFoundException if owner not found', async () => {
@@ -243,7 +243,9 @@ describe('VehiclesService', () => {
       const dto: AssignDriverDto = { vehicleId: 999, driverId: 2 };
       mockVehicleRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.assignDriver(dto)).rejects.toThrow(NotFoundException);
+      await expect(service.assignDriver(dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw NotFoundException if driver not found', async () => {
@@ -251,7 +253,9 @@ describe('VehiclesService', () => {
       mockVehicleRepository.findOne.mockResolvedValue(mockVehicle);
       mockUserRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.assignDriver(dto)).rejects.toThrow(NotFoundException);
+      await expect(service.assignDriver(dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException if user is not a driver', async () => {
@@ -260,7 +264,9 @@ describe('VehiclesService', () => {
       mockVehicleRepository.findOne.mockResolvedValue(mockVehicle);
       mockUserRepository.findOne.mockResolvedValue(nonDriver);
 
-      await expect(service.assignDriver(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.assignDriver(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if driver already assigned', async () => {
@@ -272,7 +278,9 @@ describe('VehiclesService', () => {
       mockVehicleRepository.findOne.mockResolvedValue(vehicleWithDriver);
       mockUserRepository.findOne.mockResolvedValue(mockDriver);
 
-      await expect(service.assignDriver(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.assignDriver(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -284,7 +292,9 @@ describe('VehiclesService', () => {
     };
 
     beforeEach(() => {
-      mockVehicleRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      mockVehicleRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder,
+      );
     });
 
     it('should return all vehicles without filters', async () => {
@@ -461,7 +471,10 @@ describe('VehiclesService', () => {
       const result = await service.findByOwner(1);
 
       expect(result).toHaveProperty('message');
-      expect(result.vehicles).toEqual([]);
+      expect(result).toHaveProperty('vehicles');
+      if ('vehicles' in result) {
+        expect(result.vehicles).toEqual([]);
+      }
     });
   });
 
@@ -498,14 +511,18 @@ describe('VehiclesService', () => {
     it('should throw NotFoundException if driver not found', async () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findByDriver(999)).rejects.toThrow(NotFoundException);
+      await expect(service.findByDriver(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException if user is not a driver', async () => {
       const nonDriver = { ...mockDriver, role: UserRole.PASSENGER };
       mockUserRepository.findOne.mockResolvedValue(nonDriver);
 
-      await expect(service.findByDriver(2)).rejects.toThrow(BadRequestException);
+      await expect(service.findByDriver(2)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should return message if driver has no vehicles', async () => {
@@ -515,7 +532,10 @@ describe('VehiclesService', () => {
       const result = await service.findByDriver(2);
 
       expect(result).toHaveProperty('message');
-      expect(result.vehicles).toEqual([]);
+      expect(result).toHaveProperty('vehicles');
+      if ('vehicles' in result) {
+        expect(result.vehicles).toEqual([]);
+      }
     });
   });
 
@@ -544,7 +564,9 @@ describe('VehiclesService', () => {
     it('should throw NotFoundException if vehicle not found', async () => {
       mockVehicleRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getTripsByVehicle(999)).rejects.toThrow(NotFoundException);
+      await expect(service.getTripsByVehicle(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -590,7 +612,7 @@ describe('VehiclesService', () => {
       });
 
       // Pass the string value of the enum, not the enum itself
-      const result = await service.updateStatus(1, 'inactive');
+      const result = await service.updateStatus(1, VehicleStatus.INACTIVE);
 
       expect(result.statusVehicle).toBe(VehicleStatus.INACTIVE);
     });
