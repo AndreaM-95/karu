@@ -11,8 +11,13 @@ const config: Config = {
   testRegex: '.*\\.spec\\.ts$',
   collectCoverageFrom: [
     '**/*.(t|j)s',
+    '!**/*.module.ts', 
     '!**/main.ts',
     '!**/dist/**',
+    '!**/common/filters/**',
+    '!**/common/decorators/**',
+    '!**/common/validators/**',
+    '!**/coverage/**',
     '!**/dto/**',
     '!**/interfaces/**',
     '!**/migrations/**',
