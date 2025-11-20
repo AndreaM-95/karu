@@ -189,6 +189,7 @@ export class TripsService {
       distanceKm,
       cost,
       statusTrip: TripStatus.INPROGRESS,
+      requestedAt: new Date(),  
     });
     const savedTrip = await this.tripRepository.save(trip);
 
