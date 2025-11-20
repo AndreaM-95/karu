@@ -274,9 +274,13 @@ npm run test:cov
 Todas las pruebas configuradas se ejecutan correctamente:
 ```bash
 Test Suites: 16 passed, 16 total
-Tests:       207 passed, 207 total
-Time:        78.122 s
+Tests:       215 passed, 215 total
 ```
+### Coverage
+<img width="500" height="806" alt="Test-Coverage" src="https://github.com/user-attachments/assets/9086e835-56b8-4221-bbc4-813643a5e444" />
+
+---
+
 ## 🛠️ Stack Tecnológico
 
 - Node.js  
