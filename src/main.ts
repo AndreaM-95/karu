@@ -8,8 +8,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configDoc = new DocumentBuilder()
+    .setTitle('API KARU')
     .setDescription( 'KARU es un servicio de movilidad segura para mujeres. Esta API expone los endpoints necesarios para gestionar usuarios, viajes, vehículos, ubicaciones, pagos y calificaciones, garantizando un flujo seguro mediante autenticación JWT y roles.')
-    .setVersion('1.0')
+    .setVersion('2.0')
     .addBearerAuth()
     .build();
 
