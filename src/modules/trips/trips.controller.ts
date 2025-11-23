@@ -33,7 +33,7 @@ export class TripsController {
     return this.tripsService.findAllLocations();
   }
 
-  @Get('locations/:nameLocality')
+  @Get('locations/:locality')
   @ApiOperation({ summary: 'Locality with its zones or neighborhoods' })
   @ApiResponse({ status: 200, description: 'Object of a locality with its zones or neighborhoods' })
   @ApiResponse({ status: 404, description: 'Location not found' })
