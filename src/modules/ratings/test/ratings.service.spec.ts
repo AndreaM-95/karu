@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { RatingsService } from './ratings.service';
-import { Status } from './entities/rating.entity';
-import { DriverStatus, UserRole } from '../users/entities/user.entity';
+import { RatingsService } from '../ratings.service';
+import { Status } from '../entities/rating.entity';
+import { DriverStatus, UserRole } from '../../users/entities/user.entity';
 import { LessThan } from 'typeorm';
 import { CustomHttpException } from 'src/common/exceptions/custom-http.exception';
 

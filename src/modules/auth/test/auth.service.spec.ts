@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { User, UserRole, Gender, DriverStatus } from '../users/entities/user.entity';
+import { User, UserRole, Gender, DriverStatus } from '../../users/entities/user.entity';
 import {
   ConflictException,
   UnauthorizedException,
@@ -13,9 +13,9 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { RegisterDto } from './dto/register.dto';
-import { AdminCreateUserDto } from './dto/admin-create-user.dto';
-import { ChangePasswordDTO } from './dto/change-password.dto';
+import { RegisterDto } from '../dto/register.dto';
+import { AdminCreateUserDto } from '../dto/admin-create-user.dto';
+import { ChangePasswordDTO } from '../dto/change-password.dto';
 
 describe('AuthService', () => {
   let service: AuthService;

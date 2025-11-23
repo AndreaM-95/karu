@@ -1,19 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { VehiclesService } from './vehicles.service';
+import { VehiclesService } from '../vehicles.service';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Vehicle, VehicleStatus, VehicleType } from './entities/vehicle.entity';
-import { User, UserRole, Gender } from '../users/entities/user.entity';
-import { Trip } from '../trips/entities/trip.entity';
+import { Vehicle, VehicleStatus, VehicleType } from '../entities/vehicle.entity';
+import { User, UserRole, Gender } from '../../users/entities/user.entity';
+import { Trip } from '../../trips/entities/trip.entity';
 import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { AssignDriverDto } from './dto/assing-driver.dto';
-import { QueryVehicleDto } from './dto/query-vehicle.dto';
+import { CreateVehicleDto } from '../dto/create-vehicle.dto';
+import { AssignDriverDto } from '../dto/assing-driver.dto';
+import { QueryVehicleDto } from '../dto/query-vehicle.dto';
 
 describe('VehiclesService', () => {
   let service: VehiclesService;

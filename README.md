@@ -164,83 +164,107 @@ src/
  │   │   └── user.decorator.ts
  │   ├── exceptions
  │   |   └── custom-http.exception.ts
- │   └── filters
- │       └── http-exception.filter.ts
+ │   ├── filters
+ │   |   └── http-exception.filter.ts
+ │   └── validators
+ │       └── is-adult.decorator.ts
  ├── migrations
- │       
+ │   ├── 1763051831226-InsertLocations.ts
+ │   ├── 1763355062436-SeedVehicles.ts
+ │   ├── 1763522992399-SeedUsers.ts
+ │   └── 1763523631917-InitMigration.ts 
  ├── modules/
  |   ├── auth/
  │   |   ├── decorators/
- |   │   |   └── user.decorator.ts
+ |   │   |   ├── match.decorator.ts
+ |   │   |   └── user.decorator.ts 
+ │   |   ├── dto/
+ |   │   |   ├── admin-create-user.dto.ts
+ |   │   |   ├── change-password-user.dto.ts
+ |   │   |   ├── login-user.dto.ts
+ |   │   |   └── register.dto.ts
  │   |   ├── guards/
+ |   │   |   ├── test
+ |   |   │   |   ├── jwt.guard.spec.ts
+ |   |   │   |   └── roles.guard.spec.ts
  |   │   |   ├── jwt.guard.ts
  |   │   |   └── roles.guard.ts
  │   |   ├── strategies/
+ |   │   |   ├── jwt.strategy.spec.ts
  |   │   |   └── jwt.strategy.ts
- │   |   ├── auth.controller.spec.ts
+ │   |   ├── test/
+ |   │   |   ├── auth.controller.spec.ts
+ |   │   |   └── auth.service.spec.ts
  │   |   ├── auth.controller.ts
  │   |   ├── auth.module.ts
- │   |   ├── auth.service.spec.ts
  │   |   └── auth.service.ts
  |   ├── payments/
  │   |   ├── dto/
  |   │   |   ├── create-payment-from-trip.dto.ts
- |   │   |   └── passenger-payment-history-query.dto.ts
+ |   │   |   ├── earnings-query.dto.ts
+ |   │   |   ├── passenger-payment-history-query.dto.ts
+ |   │   |   └── payment-response.dto.ts
  │   |   ├── entities/
  |   │   |   └── Payment.entity.ts
- │   |   ├── payment.controller.spec.ts
+ │   |   ├── test/
+ |   │   |   ├── payment.controller.spec.ts
+ |   │   |   └── payment.service.spec.ts
  │   |   ├── payment.controller.ts
  │   |   ├── payment.module.ts
- │   |   ├── payment.service.spec.ts
  │   |   └── payment.service.ts
  |   ├── ratings/
  │   |   ├── dto/
- |   │   |   ├── createRating.dto.ts
- |   │   |   └── updateRating.dto.ts
+ |   │   |   └── createRating.dto.ts
  │   |   ├── entities/
  |   │   |   └── Rating.entity.ts
- │   |   ├── ratings.controller.spec.ts
+ │   |   ├── test/
+ |   │   |   ├── ratings.controller.spec.ts
+ |   │   |   └── ratings.service.spec.ts
  │   |   ├── ratings.controller.ts
  │   |   ├── ratings.module.ts
- │   |   ├── ratings.service.spec.ts
  │   |   └── ratings.service.ts
  |   ├── trips/
  │   |   ├── dto/
- |   │   |   ├── create-trip.dto.ts
- |   │   |   └── update-trip.dto.ts
+ |   │   |   └── create-trip.dto.ts
  │   |   ├── entities/
  |   │   |   ├── locations.entity.ts
  |   │   |   └── trip.entity.ts
- │   |   ├── trips.controller.spec.ts
+ │   |   ├── test/
+ |   │   |   ├── trips.controller.spec.ts
+ |   │   |   └── trips.service.spec.ts
  │   |   ├── trips.controller.ts
  │   |   ├── trips.module.ts
- │   |   ├── trips.service.spec.ts
  │   |   └── trips.service.ts
  |   ├── users/
  │   |   ├── dto/
  |   │   |   ├── change-password.dto.ts
  |   │   |   ├── createUser.dto.ts
  |   │   |   ├── recover-password.dto.ts
- |   │   |   └── updateUser.dto.ts
+ |   │   |   ├── updateDriverStatus.dto.ts
+ |   │   |   ├── updateUserAdmin.dto.ts
+ |   │   |   └── updateUserSelf.dto.ts
  │   |   ├── entities/
  |   │   |   └── User.entity.ts
- │   |   ├── users.controller.spec.ts
+ │   |   ├── test/
+ |   │   |   ├── users.controller.spec.ts
+ |   │   |   └── users.service.spec.ts
  │   |   ├── users.controller.ts
  │   |   ├── users.module.ts
- │   |   ├── users.service.spec.ts
  │   |   └── users.service.ts
  |   └──  vehicles/
  │       ├── dto/
+ |       |   ├── assing-driver.dto.ts
  |       |   ├── create-vehicle.dto.ts
  |       |   ├── query-vehicle.dto.ts
- |       |   ├── response-vehicle.dto.ts
- |       |   └── update-vehicle.dto.ts
+ |       |   ├── update-vehicle-status.dto.ts
+ |       |   └── vehicle-response.dto.ts
  │       ├── entities/
  |       |   └── Vehicle.entity.ts
- │       ├── vehicles.controller.spec.ts
+ │       ├── test/
+ |       |   ├── vehicles.controller.spec.ts
+ |       |   └── vehicles.service.spec.ts
  │       ├── vehicles.controller.ts
  │       ├── vehicles.module.ts
- │       ├── vehicles.service.spec.ts
  │       └── vehicles.service.ts
  ├── app.controller.spec.ts
  ├── app.controller.ts
@@ -385,7 +409,7 @@ http://localhost:4000/api
 | Método | Ruta |
 |--------|-------|
 | GET | `/trips/locations` |
-| GET | `/trips/locations/:nameLocality` |
+| GET | `/trips/locations/:locality` |
 | GET | `/trips/my-trips` |
 | POST | `/trips/request-trip` |
 | PUT | `/trips/complete-trip/:tripId` |

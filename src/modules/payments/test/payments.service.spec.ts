@@ -1,9 +1,9 @@
 import { ForbiddenException } from '@nestjs/common';
-import { PaymentsService } from './payments.service';
-import { Payment, PaymentMethod, PaymentStatus } from './entities/payment.entity';
-import { Trip, TripStatus } from '../trips/entities/trip.entity';
+import { PaymentsService } from '../payments.service';
+import { Payment, PaymentMethod, PaymentStatus } from '../entities/payment.entity';
+import { Trip, TripStatus } from '../../trips/entities/trip.entity';
 import { CustomHttpException } from 'src/common/exceptions/custom-http.exception';
-import { UserRole } from '../users/entities/user.entity';
+import { UserRole } from '../../users/entities/user.entity';
 
 describe('PaymentsService - lógica de negocio', () => {
   let service: PaymentsService;

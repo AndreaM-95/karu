@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersController } from './users.controller';
-import { DriverStatus, UserRole } from './entities/user.entity';
+import { UsersController } from '../users.controller';
+import { DriverStatus, UserRole } from '../entities/user.entity';
 
 const userFake=[
   {idFake: 1, email: 'val@mail.com',password: '1234567',role: UserRole.DRIVER, gender: 'female',name: 'Vale',phone: '3214567890'},

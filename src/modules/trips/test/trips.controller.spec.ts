@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TripsController } from './trips.controller';
-import { TripsService } from './trips.service';
-import { TripStatus } from './entities/trip.entity';
-import { UserRole } from '../users/entities/user.entity';
+import { TripsController } from '../trips.controller';
+import { TripsService } from '../trips.service';
+import { TripStatus } from '../entities/trip.entity';
+import { UserRole } from '../../users/entities/user.entity';
 
 const locationsFake = [
   { idLocation: 10, locality: 'Usaquén', zone: 'Verbenal', latitude: 4.6, longitude: -74.0, },

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from './users.service';
-import { DriverStatus, Gender, LicenseCategory, UserRole } from './entities/user.entity';
+import { UsersService } from '../users.service';
+import { DriverStatus, Gender, LicenseCategory, UserRole } from '../entities/user.entity';
 import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { count } from 'console';

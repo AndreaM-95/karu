@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt.guard';
-import { RolesGuard } from './guards/roles.guard';
+import { AuthController } from '../auth.controller';
+import { AuthService } from '../auth.service';
+import { JwtAuthGuard } from '../guards/jwt.guard';
+import { RolesGuard } from '../guards/roles.guard';
 import { UnauthorizedException, Logger } from '@nestjs/common';
-import { UserRole, Gender, DriverStatus } from '../users/entities/user.entity';
-import { RegisterDto } from './dto/register.dto';
-import { LoginUserDTO } from './dto/login-user.dto';
-import { ChangePasswordDTO } from './dto/change-password.dto';
-import { AdminCreateUserDto } from './dto/admin-create-user.dto';
+import { UserRole, Gender, DriverStatus } from '../../users/entities/user.entity';
+import { RegisterDto } from '../dto/register.dto';
+import { LoginUserDTO } from '../dto/login-user.dto';
+import { ChangePasswordDTO } from '../dto/change-password.dto';
+import { AdminCreateUserDto } from '../dto/admin-create-user.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;

@@ -1,6 +1,6 @@
-import { Rating, Status } from './entities/rating.entity';
-import { RatingsController } from './ratings.controller';
-import { RatingsService } from './ratings.service';
+import { Rating, Status } from '../entities/rating.entity';
+import { RatingsController } from '../ratings.controller';
+import { RatingsService } from '../ratings.service';
 
 const fakeRatings: Rating[] = [
   {

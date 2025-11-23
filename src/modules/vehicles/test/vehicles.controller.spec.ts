@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { VehiclesController } from './vehicles.controller';
-import { VehiclesService } from './vehicles.service';
+import { VehiclesController } from '../vehicles.controller';
+import { VehiclesService } from '../vehicles.service';
 import { Logger } from '@nestjs/common';
-import { VehicleStatus, VehicleType } from './entities/vehicle.entity';
-import { UserRole } from '../users/entities/user.entity';
+import { VehicleStatus, VehicleType } from '../entities/vehicle.entity';
+import { UserRole } from '../../users/entities/user.entity';
 
 describe('VehiclesController', () => {
   let controller: VehiclesController;
