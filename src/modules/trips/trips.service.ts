@@ -125,24 +125,16 @@ export class TripsService {
 
     //Find a female driver with vehicles
     const driver = await this.userRepository.findOne({
-      where: { idUser: dto.driverId },
-      relations: ['drivingVehicles']
+      where: {
+        role: UserRole.DRIVER,
+        driverStatus: DriverStatus.AVAILABLE,
+        active: true,
+      },
+      relations: ['drivingVehicles'],
     });
 
-    if (!driver)
-      throw new CustomHttpException('Driver not found.', HttpStatus.NOT_FOUND);
-
-    if (!driver.active) throw new CustomHttpException('Driver is not active.');
-
-    if (driver.role !== UserRole.DRIVER)
-      throw new CustomHttpException('User is not a driver.');
-
-    if (driver.driverStatus !== DriverStatus.AVAILABLE)
-      throw new CustomHttpException('Driver is not available.');
-
-    if (!driver.drivingVehicles || driver.drivingVehicles.length === 0)
-      throw new CustomHttpException('This driver has no registered vehicles.');
-
+    if (!driver) throw new CustomHttpException('No available drivers right now.');
+    if (!driver.drivingVehicles || driver.drivingVehicles.length === 0) throw new CustomHttpException('Driver has no registered vehicles.');
     const vehicle = driver.drivingVehicles[0];
 
     //Validate locations
