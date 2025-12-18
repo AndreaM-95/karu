@@ -25,6 +25,20 @@ export class TripsController {
   private readonly logger = new Logger(TripsController.name);
   constructor(private readonly tripsService: TripsService ) {}
 
+  @Post('request-trip')
+  @ApiOperation({ summary: 'Create a trip' })
+  @ApiResponse({ status: 201, description: 'Trip successfully requested' })
+  @ApiResponse({ status: 400, description: 'User is not a passenger' })
+  @ApiResponse({ status: 400, description: 'Driver is not available' })
+  @ApiResponse({ status: 400, description: 'Invalid origin or destination' })
+  @ApiResponse({ status: 400, description: 'Origin and destination cannot be the same' })
+  @ApiResponse({ status: 400, description: 'Passenger already has an active trip' })
+  @Roles(UserRole.PASSENGER)
+  async createTrip(@Request() req, @Body() dto: CreateTripDTO) {
+    this.logger.debug(`Trip requested by passenger with token ID: ${req.user.idUser}`);
+    return this.tripsService.createTrip(req.user, dto);
+  }
+
   @Get('locations')
   @ApiOperation({ summary: 'Localities with each area or neighborhood' })
   @ApiResponse({ status: 200, description: 'Object of each locality with its zones or neighborhoods' })
@@ -47,26 +61,11 @@ export class TripsController {
   @ApiResponse({ status: 200, description: 'Trips history' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 404, description: 'No trips have been made' })
-  @Roles(UserRole.OWNER, UserRole.DRIVER, UserRole.PASSENGER)
+  @Roles(UserRole.DRIVER, UserRole.PASSENGER)
   async getUserTripHistory(@Request() req) {
     this.logger.debug("Find the user's trips");
     return this.tripsService.getUserTripHistory(req.user);
   }
-
-  @Post('request-trip')
-  @ApiOperation({ summary: 'Create a trip' })
-  @ApiResponse({ status: 201, description: 'Trip successfully requested' })
-  @ApiResponse({ status: 400, description: 'User is not a passenger' })
-  @ApiResponse({ status: 400, description: 'Driver is not available' })
-  @ApiResponse({ status: 400, description: 'Invalid origin or destination' })
-  @ApiResponse({ status: 400, description: 'Origin and destination cannot be the same' })
-  @ApiResponse({ status: 400, description: 'Passenger already has an active trip' })
-  @Roles(UserRole.PASSENGER)
-  async createTrip(@Request() req, @Body() dto: CreateTripDTO) {
-    this.logger.debug(`Trip requested by passenger with token ID: ${req.user.idUser}`);
-    return this.tripsService.createTrip(req.user, dto);
-  }
-
 
   @Put('complete-trip/:tripId')
   @ApiOperation({ summary: 'End a trip' })
