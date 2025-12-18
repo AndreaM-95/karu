@@ -369,7 +369,7 @@ src/
 |--------|-------|--------|
 | Andrea Mejía | Scrum Master / Backend dev  | [Portafolio de proyectos](https://portafolio-andrea-mejia.vercel.app/) |
 | Marcela Ramírez | Product Owner / Backend dev | [Linkedin](https://www.linkedin.com/in/cmramirez29/)  |
-| Valeria Vargas | Backend dev | [Linkedin](https://www.linkedin.com/in/valeriavcgr/)  |
+| Valeria González | Backend dev | [Linkedin](https://www.linkedin.com/in/valeriavcgr/)  |
 | Heidy Romero | Backend dev | [Linkedin](https://www.linkedin.com/in/daniiromero/)  |
 ---
 
